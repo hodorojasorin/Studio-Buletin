@@ -283,9 +283,10 @@
   #nowplaying { flex: 1; text-align: center; font-size: 13px; color: var(--ink-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   #nowplaying b { color: var(--ink); font-weight: 600; }
   .tbtn {
-    font: 700 12.5px 'Open Sans', sans-serif; letter-spacing: 1px; text-transform: uppercase;
-    padding: 11px 18px; border-radius: 10px; border: 1px solid var(--navy-line);
+    font-size: 17px; line-height: 1;
+    width: 46px; height: 42px; border-radius: 10px; border: 1px solid var(--navy-line);
     background: var(--navy-card); color: var(--ink); cursor: pointer; transition: all .15s;
+    display: grid; place-items: center;
   }
   .tbtn:hover { border-color: var(--teal); color: var(--teal); }
   .tbtn.stop:hover { border-color: var(--red); color: var(--red); }
@@ -448,9 +449,9 @@
     <span id="volpct" style="min-width:38px">90%</span>
   </div>
   <div id="nowplaying">Nimic în redare</div>
-  <button class="tbtn" id="fadebtn" title="Fade out lent (F)">Fade out</button>
-  <button class="tbtn stop" id="stopbtn" title="Oprește tot (Esc)">■ Stop tot</button>
-  <button class="tbtn" id="fsbtn" title="Ecran complet">⛶ Full screen</button>
+  <button class="tbtn" id="fadebtn" title="Fade out lent (F)">🔉</button>
+  <button class="tbtn stop" id="stopbtn" title="Oprește tot (Esc)">■</button>
+  <button class="tbtn" id="fsbtn" title="Ecran complet">⛶</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1094,7 +1095,7 @@ $('fsbtn').onclick = () => {
   else document.documentElement.requestFullscreen();
 };
 document.addEventListener('fullscreenchange', () => {
-  $('fsbtn').textContent = document.fullscreenElement ? '⛶ Ieși din full screen' : '⛶ Full screen';
+  $('fsbtn').title = document.fullscreenElement ? 'Ieși din ecran complet' : 'Ecran complet';
 });
 $('preview-jingle').onclick = () => {
   if (jingle.paused) { jingle.currentTime = 0; jingle.volume = masterVol; jingle.play(); }
