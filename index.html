@@ -655,7 +655,14 @@ function spInitPlayer() {
   });
   SP.player.addListener('ready', ({ device_id }) => { SP.deviceId = device_id; SP.ready = true; spRenderStatus(); });
   SP.player.addListener('not_ready', () => { SP.ready = false; spRenderStatus(); });
-  SP.player.addListener('player_state_changed', st => { SP.state = st; });
+  SP.player.addListener('player_state_changed', st => {
+    SP.state = st;
+    /* fade-in abia când redarea chiar a început, nu pe cronometru */
+    if (SP.pendingFade && st && !st.paused) {
+      SP.pendingFade = false;
+      spFade(masterVol, 2200);
+    }
+  });
   SP.player.addListener('initialization_error', () => toast('Spotify: browserul nu suportă playerul (folosește Chrome)'));
   SP.player.addListener('authentication_error', () => { spDisconnect(); toast('Spotify: sesiune expirată, reconectează-te'); });
   SP.player.addListener('account_error', () => toast('Spotify Web Player necesită cont Premium'));
@@ -684,7 +691,7 @@ async function spPlay(uri, { loop }) {
     body: JSON.stringify({ uris: [uri] })
   });
   sApi(`/me/player/repeat?state=${loop ? 'track' : 'off'}&device_id=${SP.deviceId}`, { method: 'PUT' }).catch(() => {});
-  spFade(masterVol, 1800);
+  SP.pendingFade = true;
 }
 async function spStop() {
   clearInterval(SP.fadeTimer); SP.fadeTimer = null;
@@ -756,7 +763,7 @@ function refreshSpChips() {
 
 /* ───────────────────────── YouTube (IFrame Player API) ───────────────────────── */
 const ytLib = JSON.parse(localStorage.getItem('buletin.ytlist') || '[]');
-let ytPlayer = null, ytReady = false, ytFadeTimer = null, ytLoop = false;
+let ytPlayer = null, ytReady = false, ytFadeTimer = null, ytLoop = false, ytPendingFade = false;
 
 function ytParseId(url) {
   const m = url.match(/(?:youtube\.com\/(?:watch\?[^#]*v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
@@ -771,6 +778,11 @@ function ytLoadAPI() {
       events: {
         onReady: () => { ytReady = true; },
         onStateChange: e => {
+          /* fade-in abia când redarea chiar a început, nu pe cronometru */
+          if (e.data === YT.PlayerState.PLAYING && ytPendingFade) {
+            ytPendingFade = false;
+            ytFade(masterVol, 2200);
+          }
           if (e.data !== YT.PlayerState.ENDED || musicSrc !== 'yt') return;
           if (ytLoop) { ytPlayer.seekTo(0, true); ytPlayer.playVideo(); }
           else if (step === 'outro') finish();
@@ -802,8 +814,8 @@ function ytPlay(id, { loop }) {
   ytLoop = loop;
   $('yt-playerwrap').classList.add('show');
   ytPlayer.setVolume(0);
+  ytPendingFade = true;
   ytPlayer.loadVideoById(id);
-  ytFade(masterVol, 1800);
 }
 function ytHide() {
   $('yt-playerwrap').classList.remove('show');
@@ -1041,7 +1053,7 @@ function playLocalFile(a, { loop }) {
   music.loop = loop;
   music.volume = 0;
   music.play();
-  fade(music, masterVol, 1800);
+  fade(music, masterVol, 2200);
   musicSrc = 'local';
 }
 
