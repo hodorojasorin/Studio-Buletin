@@ -917,7 +917,7 @@ function renderYtList() {
     const li = document.createElement('li');
     li.className = 'track';
     li.innerHTML = `
-      <button class="iconbtn play" title="Redă acum (test)">▶</button>
+      <button class="cover play" title="Redă acum (test)"><img src="https://i.ytimg.com/vi/${v.id}/mqdefault.jpg" alt=""></button>
       <div class="tname"><b>${esc(v.name)}</b><small><span class="badge-yt">YOUTUBE</span></small></div>
       <button class="chip set-intro ${introOn ? 'on' : ''}" title="Setează ca piesă de deschidere">Intro</button>
       <button class="chip set-outro ${outroOn ? 'on' : ''}" title="Setează ca piesă de încheiere">Outro</button>
