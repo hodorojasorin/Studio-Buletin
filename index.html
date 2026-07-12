@@ -375,12 +375,11 @@
       </div>
 
       <div id="sp-setup" hidden>
-        Aplicația Spotify a echipei e deja configurată — nu trebuie schimbat nimic aici.
+        Configurare unică pe acest calculator (Client ID-ul rămâne salvat în browser):
         <ol>
-          <li>Dacă site-ul rulează pe o adresă nouă, adaug-o ca <b>Redirect URI</b> în
-            <a href="https://developer.spotify.com/dashboard" target="_blank">Spotify Dashboard</a>.
-            Adresa curentă: <code id="sp-redirect"></code></li>
-          <li>Client ID-ul se schimbă doar dacă echipa trece pe altă aplicație Spotify:</li>
+          <li>Intră pe <a href="https://developer.spotify.com/dashboard" target="_blank">developer.spotify.com/dashboard</a> → aplicația echipei (sau <b>Create app</b> dacă nu există).</li>
+          <li>La <b>Redirect URIs</b> trebuie să fie exact: <code id="sp-redirect"></code></li>
+          <li>Copiază <b>Client ID</b>-ul aplicației aici și salvează:</li>
         </ol>
         <input class="search" id="sp-clientid" placeholder="Client ID din Spotify Dashboard">
         <button class="sp-btn" id="sp-save">Salvează Client ID</button>
@@ -513,9 +512,8 @@ function fade(el, target, ms) {
 }
 
 /* ───────────────────────── Spotify (Web Playback SDK + PKCE) ───────────────────────── */
-const SP_DEFAULT_CLIENT_ID = 'cbb8be17b50e48d989caba653c984e42'; // aplicația Spotify a echipei
 const SP = {
-  clientId: localStorage.getItem('sp.clientId') || SP_DEFAULT_CLIENT_ID,
+  clientId: localStorage.getItem('sp.clientId') || '',
   tokens: JSON.parse(localStorage.getItem('sp.tokens') || 'null'),
   player: null, deviceId: null, ready: false, fadeTimer: null,
   lastPos: 0, state: null,
@@ -1084,6 +1082,7 @@ searchEl.oninput = renderList;
     history.replaceState({}, '', SP_REDIRECT);
   }
   spRenderStatus();
+  if (!SP.clientId) $('sp-setup').hidden = false;
   if (SP.tokens) spLoadSDK();
 
   try {
