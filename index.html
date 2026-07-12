@@ -37,17 +37,15 @@
     background: rgba(19,31,44,.55); backdrop-filter: blur(6px);
     position: sticky; top: 0; z-index: 50;
   }
-  .brand { display: flex; align-items: center; gap: 14px; }
-  .brand-mark {
-    width: 44px; height: 44px; border-radius: 12px;
-    background: var(--red);
-    display: grid; place-items: center;
-    font-family: 'Roboto Slab', serif; font-weight: 900; font-size: 20px; color: #fff;
-    box-shadow: 0 4px 18px rgba(223,22,60,.35);
+  .brand { display: flex; align-items: center; gap: 16px; }
+  .brand-logo {
+    height: 48px; width: auto;
+    background: #fff; border-radius: 10px; padding: 5px 10px;
+    box-shadow: 0 4px 18px rgba(0,0,0,.25);
   }
-  .brand h1 { font-size: 20px; font-weight: 900; letter-spacing: .5px; line-height: 1.1; }
+  .brand h1 { font-size: 22px; font-weight: 900; letter-spacing: 1px; line-height: 1.1; }
   .brand h1 span { color: var(--teal); }
-  .brand p { font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 2px; }
+  @media (max-width: 640px) { .brand-logo { height: 38px; } .brand h1 { font-size: 17px; } }
   .clockbox { text-align: right; }
   #clock { font-family: 'Roboto Slab', serif; font-weight: 700; font-size: 26px; font-variant-numeric: tabular-nums; }
   #dateline { font-size: 12px; color: var(--ink-dim); text-transform: capitalize; }
@@ -287,11 +285,8 @@
 
 <header>
   <div class="brand">
-    <div class="brand-mark">C</div>
-    <div>
-      <h1>STUDIO <span>BULETIN</span></h1>
-      <p>CEITI · Echipa de Producție Multimedia</p>
-    </div>
+    <img class="brand-logo" src="epm-logo.png" alt="Echipa de Producție Multimedia">
+    <h1>STUDIO <span>BULETIN</span></h1>
   </div>
   <div class="clockbox">
     <div id="clock">--:--:--</div>
