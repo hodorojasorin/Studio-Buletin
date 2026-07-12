@@ -167,6 +167,35 @@
     border-radius: 5px; padding: 1px 7px; font-size: 11px;
   }
 
+  /* ── Taburi surse ───────────────────────── */
+  .tabs {
+    display: flex; gap: 4px; padding: 4px; margin-bottom: 14px;
+    background: var(--navy-deep); border: 1px solid var(--navy-line); border-radius: 12px;
+  }
+  .tabs button {
+    flex: 1; padding: 10px 6px; border: none; border-radius: 9px; cursor: pointer;
+    background: transparent; color: var(--ink-dim);
+    font: 700 12px 'Open Sans', sans-serif; letter-spacing: .8px; text-transform: uppercase;
+    transition: all .15s;
+  }
+  .tabs button:hover { color: var(--ink); }
+  .tabs button.on { background: var(--teal); color: #fff; }
+
+  /* ── Programul buletinului (poza) ───────── */
+  #prog-link { display: block; margin-top: 12px; }
+  #prog-img {
+    display: block; width: 100%; border-radius: 10px;
+    border: 1px solid var(--navy-line); cursor: zoom-in;
+  }
+  #prog-setup { margin-top: 14px; border-top: 1px solid var(--navy-line); padding-top: 14px; font-size: 12.5px; color: var(--ink-dim); }
+  #prog-setup ol { margin: 8px 0 12px 18px; display: flex; flex-direction: column; gap: 5px; }
+  #prog-setup a { color: var(--teal); font-weight: 600; }
+  #prog-setup code {
+    background: var(--navy-deep); border: 1px solid var(--navy-line); border-radius: 5px;
+    padding: 1px 6px; font-size: 11.5px; color: var(--ink);
+  }
+  #prog-setup .search { margin: 0 0 8px; }
+
   /* ── Carduri surse ──────────────────────── */
   .sp-card {
     background: var(--navy-card); border: 1px solid var(--navy-line);
@@ -346,8 +375,15 @@
 </div>
 
 <main>
-  <!-- ── SPOTIFY (stânga) ── -->
+  <!-- ── SURSE MUZICĂ (stânga, pe taburi) ── -->
   <section id="col-spotify">
+    <div class="tabs" id="src-tabs">
+      <button data-tab="sp" class="on">Spotify</button>
+      <button data-tab="yt">YouTube</button>
+      <button data-tab="lib">Bibliotecă</button>
+    </div>
+
+    <div id="tab-sp">
     <div class="sp-card">
       <div class="sp-row">
         <img class="src-logo" src="spotify-icon.svg" alt="Spotify">
@@ -373,8 +409,29 @@
       <input class="search" id="sp-search" type="search" placeholder="Caută pe Spotify… piesă, artist">
       <ul id="sp-results"></ul>
     </div>
+    </div>
+
+    <!-- ── YOUTUBE ── -->
+    <div id="tab-yt" hidden>
+    <div class="sp-card">
+      <div class="sp-row">
+        <img class="src-logo" src="youtube-logo.png" alt="YouTube">
+        <div class="sp-info">
+          <b>YouTube</b>
+          <small>lipește linkul piesei — intră în listă și se redă prin platformă</small>
+        </div>
+      </div>
+      <div class="yt-addrow">
+        <input class="search" id="yt-link" type="url" placeholder="https://www.youtube.com/watch?v=…">
+        <button class="sp-btn" id="yt-add">Adaugă</button>
+      </div>
+      <div id="yt-playerwrap"><div id="yt-player"></div></div>
+      <ul id="yt-list"></ul>
+    </div>
+    </div>
 
     <!-- ── BIBLIOTECA LOCALĂ (înregistrări din repo) ── -->
+    <div id="tab-lib" hidden>
     <div class="sp-card">
       <div class="sp-row">
         <div class="lib-logo">🎙</div>
@@ -392,6 +449,7 @@
         <ul id="lib-list"></ul>
         <div class="empty" id="lib-empty">Nicio înregistrare încă — urcă fișiere audio în folderul <b>inregistrari/</b> din repo și apar aici automat.</div>
       </div>
+    </div>
     </div>
   </section>
 
@@ -454,22 +512,34 @@
     <div class="hint"><kbd>Space</kbd> pasul următor · <kbd>Esc</kbd> stop tot</div>
   </section>
 
-  <!-- ── YOUTUBE (dreapta) ── -->
+  <!-- ── PROGRAMUL BULETINULUI (dreapta) ── -->
   <section id="col-youtube">
     <div class="sp-card">
       <div class="sp-row">
-        <img class="src-logo" src="youtube-logo.png" alt="YouTube">
+        <div class="lib-logo">📅</div>
         <div class="sp-info">
-          <b>YouTube</b>
-          <small>lipește linkul piesei — intră în listă și se redă prin platformă</small>
+          <b>Programul buletinului</b>
+          <small>piesele fiecărei zile — poza se actualizează automat</small>
         </div>
+        <button class="sp-btn ghost" id="prog-setup-btn">⚙</button>
+        <button class="iconbtn" id="prog-refresh" title="Reîncarcă poza">⟳</button>
       </div>
-      <div class="yt-addrow">
-        <input class="search" id="yt-link" type="url" placeholder="https://www.youtube.com/watch?v=…">
-        <button class="sp-btn" id="yt-add">Adaugă</button>
+
+      <div id="prog-setup" hidden>
+        Pozele se iau dintr-un folder <b>public</b> de Google Drive (cea mai nouă poză apare aici):
+        <ol>
+          <li>Creează un folder în Drive → click dreapta → <b>Share</b> → „Anyone with the link".</li>
+          <li>Ia o cheie API gratuită din <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a> (Drive API activat).</li>
+          <li>Lipește-le aici — rămân salvate în browser:</li>
+        </ol>
+        <input class="search" id="prog-folder" placeholder="Linkul folderului din Drive">
+        <input class="search" id="prog-key" placeholder="Cheia API Google">
+        <button class="sp-btn" id="prog-save">Salvează</button>
+        <p style="margin-top:10px">Fără Drive configurat, se folosește folderul <code>program/</code> din repo (urci poza prin push, ca la înregistrări).</p>
       </div>
-      <div id="yt-playerwrap"><div id="yt-player"></div></div>
-      <ul id="yt-list"></ul>
+
+      <a id="prog-link" target="_blank" hidden><img id="prog-img" alt="Programul buletinului"></a>
+      <div class="empty" id="prog-empty">Nicio poză încă — configurează Drive din ⚙ sau urcă o poză în folderul <b>program/</b> din repo.</div>
     </div>
   </section>
 </main>
@@ -977,6 +1047,81 @@ function stopPreview() {
   if (previewingFile) { previewer.pause(); previewer.src = ''; previewingFile = null; renderLib(); }
 }
 
+/* ───────────────────────── Taburi surse (stânga) ───────────────────────── */
+const TABS = ['sp', 'yt', 'lib'];
+function setTab(t) {
+  for (const x of TABS) {
+    $('tab-' + x).hidden = x !== t;
+    document.querySelector(`#src-tabs [data-tab="${x}"]`).classList.toggle('on', x === t);
+  }
+  localStorage.setItem('buletin.tab', t);
+}
+document.querySelectorAll('#src-tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
+
+/* ───────────────────────── Programul buletinului (poza din Drive / repo) ───────────────────────── */
+const PROG = {
+  folder: localStorage.getItem('prog.folder') || '',
+  key: localStorage.getItem('prog.key') || ''
+};
+function progShow(src, href) {
+  $('prog-img').src = src;
+  $('prog-link').href = href || src;
+  $('prog-link').hidden = false;
+  $('prog-empty').style.display = 'none';
+}
+function progNone(msg) {
+  $('prog-link').hidden = true;
+  $('prog-empty').style.display = 'block';
+  if (msg) $('prog-empty').textContent = msg;
+}
+async function progLoad() {
+  /* 1) Google Drive — cea mai nouă poză din folderul public */
+  if (PROG.folder && PROG.key) {
+    try {
+      const q = encodeURIComponent(`'${PROG.folder}' in parents and mimeType contains 'image/' and trashed=false`);
+      const r = await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&orderBy=createdTime desc&pageSize=1&fields=files(id,name)&key=${PROG.key}`);
+      if (!r.ok) throw new Error();
+      const files = (await r.json()).files || [];
+      if (files.length) {
+        progShow(`https://drive.google.com/thumbnail?id=${files[0].id}&sz=w1600`,
+                 `https://drive.google.com/file/d/${files[0].id}/view`);
+        return;
+      }
+      progNone('Folderul din Drive nu are nicio poză încă.');
+      return;
+    } catch {
+      progNone('Nu am putut citi folderul din Drive — verifică linkul, cheia API și partajarea publică.');
+      return;
+    }
+  }
+  /* 2) fallback: folderul program/ din repo */
+  try {
+    const r = await fetch(`https://api.github.com/repos/${LIB_REPO}/contents/program?t=` + Date.now(),
+      { headers: { Accept: 'application/vnd.github+json' } });
+    if (!r.ok) throw new Error();
+    const items = (await r.json());
+    const imgs = (Array.isArray(items) ? items : [])
+      .filter(f => f.type === 'file' && /\.(jpe?g|png|webp|gif)$/i.test(f.name))
+      .sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
+    if (imgs.length) progShow('program/' + encodeURIComponent(imgs[0].name));
+    else progNone();
+  } catch { progNone(); }
+}
+$('prog-refresh').onclick = () => { progLoad(); toast('Reîncarc programul…'); };
+$('prog-setup-btn').onclick = () => { $('prog-setup').hidden = !$('prog-setup').hidden; };
+$('prog-folder').value = PROG.folder ? 'https://drive.google.com/drive/folders/' + PROG.folder : '';
+$('prog-key').value = PROG.key;
+$('prog-save').onclick = () => {
+  const m = $('prog-folder').value.match(/folders\/([A-Za-z0-9_-]+)/);
+  PROG.folder = m ? m[1] : $('prog-folder').value.trim();
+  PROG.key = $('prog-key').value.trim();
+  localStorage.setItem('prog.folder', PROG.folder);
+  localStorage.setItem('prog.key', PROG.key);
+  $('prog-setup').hidden = true;
+  progLoad();
+  toast('Setări salvate ✓');
+};
+
 /* ───────────────────────── Fluxul emisiei ───────────────────────── */
 const flowbtn = $('flowbtn');
 const stepEls = { intro: $('step1'), jingle: $('step2'), onair: $('step3'), outro: $('step4') };
@@ -1335,6 +1480,9 @@ document.addEventListener('keydown', e => {
   updateFlowBtn(); markSteps();
   renderLibLock();
   if (libUnlocked()) libLoad();
+  setTab(localStorage.getItem('buletin.tab') || 'sp');
+  progLoad();
+  setInterval(progLoad, 10 * 60 * 1000); // poza se reîmprospătează singură la 10 minute
 })();
 </script>
 </body>
