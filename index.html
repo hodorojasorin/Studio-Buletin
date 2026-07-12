@@ -164,10 +164,7 @@
     box-shadow: 0 2px 12px rgba(26,41,58,.06);
   }
   .sp-row { display: flex; align-items: center; gap: 12px; }
-  .sp-logo {
-    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
-    background: #1DB954; color: #fff; display: grid; place-items: center; font-size: 19px;
-  }
+  .src-logo { width: 38px; height: 38px; object-fit: contain; flex-shrink: 0; }
   .sp-info { flex: 1; min-width: 0; }
   .sp-info b { display: block; font-size: 14px; }
   .sp-info small { color: var(--ink-dim); font-size: 11.5px; }
@@ -203,10 +200,6 @@
   }
 
   /* ── YouTube ────────────────────────────── */
-  .yt-logo {
-    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
-    background: #FF0000; display: grid; place-items: center;
-  }
   .yt-addrow { display: flex; gap: 8px; margin-top: 12px; }
   .yt-addrow .search { margin-bottom: 0; flex: 1; }
   .yt-addrow .sp-btn { flex-shrink: 0; }
@@ -323,11 +316,7 @@
   <section id="col-spotify">
     <div class="sp-card">
       <div class="sp-row">
-        <div class="sp-logo">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
-            <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
-          </svg>
-        </div>
+        <img class="src-logo" src="spotify-icon.svg" alt="Spotify">
         <div class="sp-info">
           <b>Spotify Web Player</b>
           <small id="sp-status">neconectat — apasă „Conectează" (cont Premium)</small>
@@ -429,9 +418,7 @@
   <section id="col-youtube">
     <div class="sp-card">
       <div class="sp-row">
-        <div class="yt-logo">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-        </div>
+        <img class="src-logo" src="youtube-logo.png" alt="YouTube">
         <div class="sp-info">
           <b>YouTube</b>
           <small>lipește linkul piesei — intră în listă și se redă prin platformă</small>
