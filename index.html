@@ -199,6 +199,24 @@
     background: #1DB954; color: #fff; border-radius: 4px; padding: 1px 5px; vertical-align: 1px;
   }
 
+  /* ── YouTube ────────────────────────────── */
+  .yt-logo {
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+    background: #FF0000; display: grid; place-items: center;
+  }
+  .yt-addrow { display: flex; gap: 8px; margin-top: 12px; }
+  .yt-addrow .search { margin-bottom: 0; flex: 1; }
+  .yt-addrow .sp-btn { flex-shrink: 0; }
+  #yt-playerwrap { max-height: 0; overflow: hidden; transition: max-height .35s; }
+  #yt-playerwrap.show { max-height: 300px; margin-top: 12px; }
+  #yt-playerwrap iframe, #yt-player { width: 100%; aspect-ratio: 16/9; max-height: 280px; border: 0; border-radius: 10px; display: block; }
+  #yt-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 12px; max-height: 30vh; overflow-y: auto; }
+  #yt-list:empty { margin-top: 0; }
+  .badge-yt {
+    display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: 1px;
+    background: #FF0000; color: #fff; border-radius: 4px; padding: 1px 5px; vertical-align: 1px;
+  }
+
   /* ── Library ────────────────────────────── */
   .drop {
     border: 2px dashed var(--navy-line); border-radius: var(--radius);
@@ -349,7 +367,7 @@
   <!-- ── SURSE MUZICĂ ── -->
   <section>
     <div class="panel-title">Piesele zilei</div>
-    <p class="src-note">În fiecare zi alegeți piesa de <b>deschidere</b> și cea de <b>încheiere</b> din oricare sursă de mai jos — căutați pe Spotify <i>sau</i> trageți fișierele manual, apoi apăsați <b>Intro</b> / <b>Outro</b> pe piesă. Se pot și combina.</p>
+    <p class="src-note">În fiecare zi alegeți piesa de <b>deschidere</b> și cea de <b>încheiere</b> din oricare sursă de mai jos — căutați pe Spotify, lipiți un link de YouTube <i>sau</i> trageți fișierele manual, apoi apăsați <b>Intro</b> / <b>Outro</b> pe piesă. Se pot și combina.</p>
 
     <div class="panel-title">Varianta 1 · Spotify</div>
 
@@ -383,7 +401,27 @@
       <ul id="sp-results"></ul>
     </div>
 
-    <div class="panel-title">Varianta 2 · Manual, drag &amp; drop</div>
+    <div class="panel-title">Varianta 2 · YouTube, cu link</div>
+
+    <div class="sp-card">
+      <div class="sp-row">
+        <div class="yt-logo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+        </div>
+        <div class="sp-info">
+          <b>YouTube</b>
+          <small>lipește linkul piesei — intră în listă și se redă prin platformă</small>
+        </div>
+      </div>
+      <div class="yt-addrow">
+        <input class="search" id="yt-link" type="url" placeholder="https://www.youtube.com/watch?v=…">
+        <button class="sp-btn" id="yt-add">Adaugă</button>
+      </div>
+      <div id="yt-playerwrap"><div id="yt-player"></div></div>
+      <ul id="yt-list"></ul>
+    </div>
+
+    <div class="panel-title">Varianta 3 · Manual, drag &amp; drop</div>
 
     <div class="drop" id="drop">
       <strong>Trage piesele aici</strong> sau apasă ca să le alegi<br>
@@ -691,7 +729,7 @@ function isAssigned(slot, spTrack) {
 function setAssignSp(slot, t) {
   assign[slot] = isAssigned(slot, t) ? null : { type: 'sp', uri: t.uri, name: t.name, dur: t.dur };
   localStorage.setItem('buletin.assign', JSON.stringify(assign));
-  refreshSpChips(); renderList(); renderAssign();
+  refreshSpChips(); renderList(); renderAssign(); renderYtList();
 }
 function refreshSpChips() {
   for (const li of $('sp-results').children) {
@@ -700,6 +738,121 @@ function refreshSpChips() {
   }
   const q = $('sp-search').value.trim();
   if (q) $('sp-search').dispatchEvent(new Event('input'));
+}
+
+/* ───────────────────────── YouTube (IFrame Player API) ───────────────────────── */
+const ytLib = JSON.parse(localStorage.getItem('buletin.ytlist') || '[]');
+let ytPlayer = null, ytReady = false, ytFadeTimer = null, ytLoop = false;
+
+function ytParseId(url) {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?[^#]*v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+  return m ? m[1] : null;
+}
+function ytLoadAPI() {
+  if (document.getElementById('ytapi')) return;
+  window.onYouTubeIframeAPIReady = () => {
+    ytPlayer = new YT.Player('yt-player', {
+      width: '100%', height: '100%',
+      playerVars: { playsinline: 1, rel: 0 },
+      events: {
+        onReady: () => { ytReady = true; },
+        onStateChange: e => {
+          if (e.data !== YT.PlayerState.ENDED || musicSrc !== 'yt') return;
+          if (ytLoop) { ytPlayer.seekTo(0, true); ytPlayer.playVideo(); }
+          else if (step === 'outro') finish();
+          else { $('yt-playerwrap').classList.remove('show'); musicSrc = null; updateNow(); }
+        },
+        onError: () => toast('Videoclipul nu permite redarea în afara YouTube — alege alt link')
+      }
+    });
+  };
+  const s = document.createElement('script');
+  s.id = 'ytapi'; s.src = 'https://www.youtube.com/iframe_api';
+  document.body.appendChild(s);
+}
+function ytFade(target, ms) {
+  return new Promise(res => {
+    if (!ytPlayer || !ytReady) return res();
+    clearInterval(ytFadeTimer);
+    const from = ytPlayer.getVolume() / 100;
+    const steps = Math.max(1, Math.round(ms / 60));
+    let i = 0;
+    ytFadeTimer = setInterval(() => {
+      i++;
+      ytPlayer.setVolume(Math.round(Math.min(1, Math.max(0, from + (target - from) * (i / steps))) * 100));
+      if (i >= steps) { clearInterval(ytFadeTimer); ytFadeTimer = null; res(); }
+    }, 60);
+  });
+}
+function ytPlay(id, { loop }) {
+  ytLoop = loop;
+  $('yt-playerwrap').classList.add('show');
+  ytPlayer.setVolume(0);
+  ytPlayer.loadVideoById(id);
+  ytFade(masterVol, 1800);
+}
+function ytHide() {
+  $('yt-playerwrap').classList.remove('show');
+}
+
+async function ytAdd() {
+  const id = ytParseId($('yt-link').value.trim());
+  if (!id) { toast('Linkul nu pare a fi un video YouTube valid'); return; }
+  if (ytLib.some(v => v.id === id)) { toast('Videoclipul e deja în listă'); $('yt-link').value = ''; return; }
+  let name = 'Video YouTube · ' + id;
+  try {
+    const r = await fetch('https://www.youtube.com/oembed?url=' + encodeURIComponent('https://www.youtube.com/watch?v=' + id) + '&format=json');
+    if (r.ok) name = (await r.json()).title;
+  } catch {}
+  ytLib.push({ id, name, addedAt: Date.now() });
+  localStorage.setItem('buletin.ytlist', JSON.stringify(ytLib));
+  $('yt-link').value = '';
+  renderYtList();
+  toast(`„${name}" adăugat ✓`);
+}
+$('yt-add').onclick = ytAdd;
+$('yt-link').addEventListener('keydown', e => { if (e.key === 'Enter') ytAdd(); });
+
+function renderYtList() {
+  const ul = $('yt-list');
+  ul.innerHTML = '';
+  for (const v of [...ytLib].sort((a, b) => b.addedAt - a.addedAt)) {
+    const introOn = assign.intro?.type === 'yt' && assign.intro.id === v.id;
+    const outroOn = assign.outro?.type === 'yt' && assign.outro.id === v.id;
+    const li = document.createElement('li');
+    li.className = 'track';
+    li.innerHTML = `
+      <button class="iconbtn play" title="Redă acum (test)">▶</button>
+      <div class="tname"><b>${esc(v.name)}</b><small><span class="badge-yt">YOUTUBE</span></small></div>
+      <button class="chip set-intro ${introOn ? 'on' : ''}" title="Setează ca piesă de deschidere">Intro</button>
+      <button class="chip set-outro ${outroOn ? 'on' : ''}" title="Setează ca piesă de încheiere">Outro</button>
+      <button class="iconbtn danger del" title="Șterge din listă">✕</button>`;
+    li.querySelector('.play').onclick = () => {
+      if (step !== 'idle') { toast('Emisia e în desfășurare — nu porni alt sunet'); return; }
+      if (!ytReady) { toast('Playerul YouTube încă pornește — încearcă în câteva secunde'); return; }
+      stopPreview();
+      ytPlay(v.id, { loop: false });
+      musicSrc = 'yt';
+      updateNow('Test: ' + v.name);
+    };
+    li.querySelector('.set-intro').onclick = () => setAssignYt('intro', v);
+    li.querySelector('.set-outro').onclick = () => setAssignYt('outro', v);
+    li.querySelector('.del').onclick = () => {
+      ytLib.splice(ytLib.findIndex(x => x.id === v.id), 1);
+      localStorage.setItem('buletin.ytlist', JSON.stringify(ytLib));
+      for (const slot of ['intro', 'outro'])
+        if (assign[slot]?.type === 'yt' && assign[slot].id === v.id) assign[slot] = null;
+      localStorage.setItem('buletin.assign', JSON.stringify(assign));
+      renderYtList(); renderAssign(); renderList();
+    };
+    ul.appendChild(li);
+  }
+}
+function setAssignYt(slot, v) {
+  const on = assign[slot]?.type === 'yt' && assign[slot].id === v.id;
+  assign[slot] = on ? null : { type: 'yt', id: v.id, name: v.name };
+  localStorage.setItem('buletin.assign', JSON.stringify(assign));
+  renderList(); renderAssign(); refreshSpChips(); renderYtList();
 }
 
 /* ───────────────────────── Bibliotecă locală ───────────────────────── */
@@ -740,13 +893,14 @@ function setAssign(slot, t) {
   const on = assign[slot]?.type === 'local' && assign[slot].id === t.id;
   assign[slot] = on ? null : { type: 'local', id: t.id };
   localStorage.setItem('buletin.assign', JSON.stringify(assign));
-  renderList(); renderAssign(); refreshSpChips();
+  renderList(); renderAssign(); refreshSpChips(); renderYtList();
 }
 
 function assignedLabel(slot) {
   const a = assign[slot];
   if (!a) return null;
   if (a.type === 'local') return trackById(a.id)?.name ?? null;
+  if (a.type === 'yt') return a.name + '  · YouTube';
   return a.name + '  · Spotify';
 }
 
@@ -867,6 +1021,14 @@ async function playAssigned(slot, { loop }) {
     updateNow((slot === 'intro' ? 'Deschidere: ' : 'Încheiere: ') + t.name);
     return true;
   }
+  /* YouTube */
+  if (a.type === 'yt') {
+    if (!ytReady) { toast('Playerul YouTube încă pornește — încearcă în câteva secunde'); return false; }
+    ytPlay(a.id, { loop });
+    musicSrc = 'yt';
+    updateNow((slot === 'intro' ? 'Deschidere: ' : 'Încheiere: ') + a.name + ' · YouTube');
+    return true;
+  }
   /* Spotify */
   if (!SP.tokens) { toast('Conectează Spotify întâi (panoul din dreapta)'); return false; }
   if (!SP.ready) { toast('Playerul Spotify încă pornește — încearcă în câteva secunde'); return false; }
@@ -880,6 +1042,7 @@ async function playAssigned(slot, { loop }) {
 
 async function fadeStopMusic(ms) {
   if (musicSrc === 'sp') { await spFade(0, ms); await spStop(); }
+  else if (musicSrc === 'yt') { await ytFade(0, ms); try { ytPlayer.pauseVideo(); } catch {} ytHide(); }
   else { await fade(music, 0, ms); music.pause(); }
 }
 
@@ -924,6 +1087,7 @@ function finish() {
   step = 'idle';
   musicSrc = null;
   music.onended = null;
+  ytHide();
   updateNow();
   updateFlowBtn(); markSteps();
   toast('Buletin încheiat — pe mâine! 🎬');
@@ -934,6 +1098,9 @@ function stopAll() {
   if (jingle._fadeTimer) clearInterval(jingle._fadeTimer);
   music.pause(); jingle.pause(); jingle.currentTime = 0;
   spStop();
+  clearInterval(ytFadeTimer); ytFadeTimer = null;
+  try { ytPlayer?.stopVideo(); } catch {}
+  ytHide();
   stopPreview();
   step = 'idle'; musicSrc = null;
   updateNow(); updateFlowBtn(); markSteps();
@@ -944,6 +1111,8 @@ async function fadeOutCurrent() {
   const localActive = [music, jingle, previewer].filter(a => !a.paused);
   if (localActive.length) jobs.push(Promise.all(localActive.map(a => fade(a, 0, 2500))).then(() => localActive.forEach(a => a.pause())));
   if (musicSrc === 'sp') jobs.push(spFade(0, 2500).then(spStop));
+  if (musicSrc === 'yt' && ytPlayer?.getPlayerState?.() === 1)
+    jobs.push(ytFade(0, 2500).then(() => { try { ytPlayer.pauseVideo(); } catch {} ytHide(); }));
   if (!jobs.length) return;
   await Promise.all(jobs);
   if (step === 'outro') finish();
@@ -997,6 +1166,8 @@ function bindSeek(pre) {
     } else if (musicSrc === 'sp' && SP.player) {
       const st = await SP.player.getCurrentState().catch(() => null);
       if (st) { SP.player.seek(Math.round(frac * st.duration)); SP.lastPos = frac * st.duration; }
+    } else if (musicSrc === 'yt' && ytPlayer && lastDur[pre]) {
+      ytPlayer.seekTo(frac * lastDur[pre], true);
     }
     seekingPre = null;
     el.blur(); // ca Space să continue să treacă la pasul următor
@@ -1024,6 +1195,12 @@ setInterval(async () => {
     /* detectează sfârșitul piesei de încheiere pe Spotify */
     if (outroActive && st && st.paused && st.position === 0 && SP.lastPos > 2000) finish();
     if (st && !st.paused) SP.lastPos = st.position;
+  } else if (musicSrc === 'yt' && ytPlayer && ytReady) {
+    const playing = ytPlayer.getPlayerState?.() === 1;
+    $('eq-intro').classList.toggle('playing', introActive && playing);
+    $('eq-outro').classList.toggle('playing', outroActive && playing);
+    if (introActive || outroActive)
+      setProgress(introActive ? 'intro' : 'outro', ytPlayer.getCurrentTime?.() || 0, ytPlayer.getDuration?.() || 0);
   } else {
     $('eq-intro').classList.remove('playing');
     $('eq-outro').classList.remove('playing');
@@ -1033,6 +1210,7 @@ setInterval(async () => {
 $('loop-intro').onchange = e => {
   if (step !== 'intro') return;
   if (musicSrc === 'local') music.loop = e.target.checked;
+  else if (musicSrc === 'yt') ytLoop = e.target.checked;
   else if (musicSrc === 'sp') sApi(`/me/player/repeat?state=${e.target.checked ? 'track' : 'off'}&device_id=${SP.deviceId}`, { method: 'PUT' }).catch(() => {});
 };
 
@@ -1046,6 +1224,7 @@ volEl.oninput = () => {
   localStorage.setItem('buletin.vol', volEl.value);
   [music, jingle, previewer].forEach(a => { if (!a._fadeTimer && !a.paused) a.volume = masterVol; });
   if (SP.player && !SP.fadeTimer && musicSrc === 'sp') SP.player.setVolume(masterVol);
+  if (ytPlayer && ytReady && !ytFadeTimer && musicSrc === 'yt') ytPlayer.setVolume(Math.round(masterVol * 100));
 };
 
 /* ── Tastatură ── */
@@ -1078,6 +1257,8 @@ searchEl.oninput = renderList;
   spRenderStatus();
   if (!SP.clientId) $('sp-setup').hidden = false;
   if (SP.tokens) spLoadSDK();
+  ytLoadAPI();
+  renderYtList();
 
   try {
     await openDB();
