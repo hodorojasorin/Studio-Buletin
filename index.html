@@ -53,9 +53,11 @@
     background: var(--red); color: #fff;
     font-family: 'Roboto Slab', serif; font-weight: 900; font-size: 17px; letter-spacing: 6px;
     text-align: center;
-    opacity: 0; pointer-events: none; transition: opacity .35s;
+    opacity: 0; pointer-events: none; transition: opacity .35s, background .35s;
   }
   #onair.live { opacity: 1; animation: pulse 1.4s ease-in-out infinite; }
+  #onair.playing { opacity: 1; background: var(--teal); letter-spacing: .5px; font-size: 15px; }
+  #onair.playing .dot { display: none; }
   #onair .dot { width: 12px; height: 12px; border-radius: 50%; background: #fff; animation: blink 1.4s ease-in-out infinite; }
   @keyframes pulse { 50% { background: #b8102f; } }
   @keyframes blink { 50% { opacity: .25; } }
@@ -328,7 +330,7 @@
   </div>
 </header>
 
-<div id="onair"><span class="dot"></span> ON AIR — SPEAKERII VORBESC <span class="dot"></span></div>
+<div id="onair"><span class="dot"></span> <span id="onair-text">ON AIR — SPEAKERII VORBESC</span> <span class="dot"></span></div>
 
 <main>
   <!-- ── SPOTIFY (stânga) ── -->
@@ -1003,7 +1005,22 @@ function markSteps() {
     stepEls[s].classList.toggle('done', step !== 'idle' && i < idx);
   });
   if (step === 'idle') order.forEach(s => stepEls[s].classList.remove('active', 'done'));
-  $('onair').classList.toggle('live', step === 'onair');
+  updateStrip();
+}
+
+/* banda de sus: piesa în redare (teal) sau ON AIR (roșu) */
+let nowPlayingText = '';
+function updateStrip() {
+  const strip = $('onair');
+  if (step === 'onair') {
+    strip.className = 'live';
+    $('onair-text').textContent = 'ON AIR — SPEAKERII VORBESC';
+  } else if (nowPlayingText) {
+    strip.className = 'playing';
+    $('onair-text').textContent = '♪ ' + nowPlayingText;
+  } else {
+    strip.className = '';
+  }
 }
 
 function playLocalFile(a, { loop }) {
@@ -1154,6 +1171,8 @@ $('preview-jingle').onclick = () => {
 /* ── Progres & indicatori (local + Spotify + YouTube) ── */
 function updateNow(text) {
   $('nowplaying').innerHTML = text ? `<b>${esc(text)}</b>` : 'Nimic în redare';
+  nowPlayingText = text || '';
+  updateStrip();
 }
 const lastDur = { intro: 0, outro: 0, onair: 0 };
 let seekingPre = null; // slotul pe care utilizatorul trage sliderul acum
