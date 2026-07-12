@@ -320,6 +320,17 @@
     padding: 14px 28px;
   }
   .transport .vol { display: flex; align-items: center; gap: 10px; flex: 1; max-width: 340px; font-size: 12px; color: var(--ink-dim); }
+  .meter {
+    flex: 1; display: flex; gap: 3px; align-items: center;
+    height: 14px; max-width: 620px; margin: 0 22px;
+  }
+  .meter i {
+    flex: 1; height: 100%; border-radius: 2px;
+    background: var(--navy-deep); border: 1px solid var(--navy-line);
+    transition: background .07s, border-color .07s;
+  }
+  .meter i.lit { background: var(--teal); border-color: var(--teal); }
+  .meter i.hot.lit { background: var(--red); border-color: var(--red); }
   input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 6px; background: var(--navy-line); outline: none; }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
@@ -540,7 +551,7 @@
     <input type="range" id="volume" min="0" max="100" value="90">
     <span id="volpct" style="min-width:38px">90%</span>
   </div>
-  <div style="flex:1"></div>
+  <div class="meter" id="meter" title="Nivel audio"></div>
   <button class="tbtn stop" id="stopbtn" title="Oprește tot (Esc)">
     <svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></svg>
   </button>
@@ -1415,6 +1426,38 @@ $('loop-intro').onchange = e => {
   else if (musicSrc === 'yt') ytLoop = e.target.checked;
   else if (musicSrc === 'sp') sApi(`/me/player/repeat?state=${e.target.checked ? 'track' : 'off'}&device_id=${SP.deviceId}`, { method: 'PUT' }).catch(() => {});
 };
+
+/* ── VU meter (mixer) din footer ── */
+const meterEl = $('meter');
+const METER_SEGS = 32;
+for (let i = 0; i < METER_SEGS; i++) {
+  const seg = document.createElement('i');
+  if (i >= METER_SEGS - 6) seg.className = 'hot'; // vârful scalei, ca pe mixere
+  meterEl.appendChild(seg);
+}
+let meterLevel = 0;
+setInterval(() => {
+  /* nivelul-țintă: volumul efectiv al sursei care cântă acum */
+  let gain = 0, playing = false;
+  [music, jingle, previewer].forEach(a => {
+    if (!a.paused) { playing = true; gain = Math.max(gain, a.volume); }
+  });
+  if (musicSrc === 'sp' && SP.state && !SP.state.paused) {
+    playing = true;
+    gain = Math.max(gain, SP.meterVol ?? masterVol);
+    SP.player?.getVolume().then(v => { SP.meterVol = v; }).catch(() => {});
+  }
+  if (ytPlayer?.getPlayerState?.() === 1) {
+    playing = true;
+    gain = Math.max(gain, (ytPlayer.getVolume?.() || 0) / 100);
+  }
+  /* mișcare vie cât cântă; cădere lină spre zero când se oprește */
+  const target = playing ? gain * (0.58 + 0.42 * Math.random()) : 0;
+  meterLevel += (target - meterLevel) * (target > meterLevel ? 0.55 : 0.22);
+  if (meterLevel < 0.005) meterLevel = 0;
+  const lit = Math.round(meterLevel * METER_SEGS);
+  [...meterEl.children].forEach((seg, i) => seg.classList.toggle('lit', i < lit));
+}, 90);
 
 /* ── Volum master ── */
 const volEl = $('volume');
