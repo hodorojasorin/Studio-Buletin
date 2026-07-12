@@ -526,16 +526,17 @@
       </div>
 
       <div id="prog-setup" hidden>
-        Pozele se iau dintr-un folder <b>public</b> de Google Drive (cea mai nouă poză apare aici):
+        Folderul echipei din Drive e deja setat — pozele urcate acolo apar automat (cea mai nouă).
+        Mai trebuie doar <b>cheia API</b> (o singură dată pe acest calculator):
         <ol>
-          <li>Creează un folder în Drive → click dreapta → <b>Share</b> → „Anyone with the link".</li>
-          <li>Ia o cheie API gratuită din <a href="https://console.cloud.google.com/apis/credentials" target="_blank">Google Cloud Console</a> (Drive API activat).</li>
-          <li>Lipește-le aici — rămân salvate în browser:</li>
+          <li>Intră pe <a href="https://console.cloud.google.com/apis/credentials" target="_blank">console.cloud.google.com/apis/credentials</a> (cont Google, proiect nou gratuit).</li>
+          <li>Activează <b>Google Drive API</b> din „Enabled APIs", apoi <b>Create credentials → API key</b>.</li>
+          <li>Lipește cheia aici:</li>
         </ol>
-        <input class="search" id="prog-folder" placeholder="Linkul folderului din Drive">
-        <input class="search" id="prog-key" placeholder="Cheia API Google">
+        <input class="search" id="prog-key" placeholder="Cheia API Google (AIza…)">
+        <input class="search" id="prog-folder" placeholder="Linkul folderului din Drive (doar dacă îl schimbi)">
         <button class="sp-btn" id="prog-save">Salvează</button>
-        <p style="margin-top:10px">Fără Drive configurat, se folosește folderul <code>program/</code> din repo (urci poza prin push, ca la înregistrări).</p>
+        <p style="margin-top:10px">Fără cheie, se folosește folderul <code>program/</code> din repo (urci poza prin push, ca la înregistrări).</p>
       </div>
 
       <a id="prog-link" target="_blank" hidden><img id="prog-img" alt="Programul buletinului"></a>
@@ -1060,7 +1061,8 @@ document.querySelectorAll('#src-tabs button').forEach(b => b.onclick = () => set
 
 /* ───────────────────────── Programul buletinului (poza din Drive / repo) ───────────────────────── */
 const PROG = {
-  folder: localStorage.getItem('prog.folder') || '',
+  /* folderul echipei din Google Drive (public) — setat din start */
+  folder: localStorage.getItem('prog.folder') || '15BeAo8wygvG-4RbHoBojLxONP9o-VBcQ',
   key: localStorage.getItem('prog.key') || ''
 };
 function progShow(src, href) {
@@ -1104,7 +1106,9 @@ async function progLoad() {
       .filter(f => f.type === 'file' && /\.(jpe?g|png|webp|gif)$/i.test(f.name))
       .sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
     if (imgs.length) progShow('program/' + encodeURIComponent(imgs[0].name));
-    else progNone();
+    else progNone(PROG.folder && !PROG.key
+      ? 'Folderul Drive e setat — mai trebuie cheia API. Apasă ⚙ pentru pași.'
+      : undefined);
   } catch { progNone(); }
 }
 $('prog-refresh').onclick = () => { progLoad(); toast('Reîncarc programul…'); };
