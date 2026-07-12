@@ -252,6 +252,19 @@
     width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 13px;
     display: grid; place-items: center; transition: all .15s; flex-shrink: 0;
   }
+  .cover {
+    width: 40px; height: 40px; border-radius: 8px; overflow: hidden; flex-shrink: 0;
+    border: 1px solid var(--navy-line); background: var(--navy-deep); color: var(--ink);
+    padding: 0; cursor: pointer; position: relative; display: grid; place-items: center;
+  }
+  .cover img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .cover::after {
+    content: '▶'; position: absolute; inset: 0;
+    display: grid; place-items: center;
+    background: rgba(19,31,44,.45); color: #fff; font-size: 14px;
+    opacity: 0; transition: opacity .15s;
+  }
+  .cover:hover::after { opacity: 1; }
   .iconbtn:hover { border-color: var(--teal); color: var(--teal); }
   .iconbtn.danger:hover { border-color: var(--red); color: var(--red); }
   .chip {
@@ -690,10 +703,11 @@ function renderSpResults(items) {
   ul.innerHTML = '';
   for (const it of items) {
     const t = { uri: it.uri, name: it.name + ' — ' + it.artists.map(a => a.name).join(', '), dur: it.duration_ms };
+    const img = it.album?.images?.at(-1)?.url;
     const li = document.createElement('li');
     li.className = 'track';
     li.innerHTML = `
-      <button class="iconbtn play" title="Redă acum (test)">▶</button>
+      <button class="cover play" title="Redă acum (test)">${img ? `<img src="${img}" alt="">` : '▶'}</button>
       <div class="tname"><b>${esc(t.name)}</b><small>${fmt(t.dur / 1000)} · <span class="badge-sp">SPOTIFY</span></small></div>
       <button class="chip set-intro ${isAssigned('intro', t) ? 'on' : ''}">Intro</button>
       <button class="chip set-outro ${isAssigned('outro', t) ? 'on' : ''}">Outro</button>`;
