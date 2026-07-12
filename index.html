@@ -176,21 +176,13 @@
   .tabs button.on { background: var(--teal); color: #fff; }
 
   /* ── Programul buletinului (poza) ───────── */
-  #prog-link { display: block; margin-top: 12px; }
+  #prog-link { display: block; }
   #prog-link[hidden] { display: none; }
   #prog-img {
     /* pozele sunt portret (1080×1920) — limităm înălțimea ca să nu domine pagina */
     display: block; max-width: 100%; max-height: 60vh; width: auto; margin: 0 auto;
     border-radius: 10px; border: 1px solid var(--navy-line); cursor: zoom-in;
   }
-  #prog-setup { margin-top: 14px; border-top: 1px solid var(--navy-line); padding-top: 14px; font-size: 12.5px; color: var(--ink-dim); }
-  #prog-setup ol { margin: 8px 0 12px 18px; display: flex; flex-direction: column; gap: 5px; }
-  #prog-setup a { color: var(--teal); font-weight: 600; }
-  #prog-setup code {
-    background: var(--navy-deep); border: 1px solid var(--navy-line); border-radius: 5px;
-    padding: 1px 6px; font-size: 11.5px; color: var(--ink);
-  }
-  #prog-setup .search { margin: 0 0 8px; }
 
   /* ── Carduri surse ──────────────────────── */
   .sp-card {
@@ -517,30 +509,8 @@
   <!-- ── PROGRAMUL BULETINULUI (dreapta) ── -->
   <section id="col-youtube">
     <div class="sp-card">
-      <div class="sp-row">
-        <div class="sp-info">
-          <b>Programul buletinului</b>
-        </div>
-        <button class="sp-btn ghost" id="prog-setup-btn">⚙</button>
-        <button class="iconbtn" id="prog-refresh" title="Reîncarcă poza">⟳</button>
-      </div>
-
-      <div id="prog-setup" hidden>
-        Folderul echipei din Drive e deja setat — pozele urcate acolo apar automat (cea mai nouă).
-        Mai trebuie doar <b>cheia API</b> (o singură dată pe acest calculator):
-        <ol>
-          <li>Intră pe <a href="https://console.cloud.google.com/apis/credentials" target="_blank">console.cloud.google.com/apis/credentials</a> (cont Google, proiect nou gratuit).</li>
-          <li>Activează <b>Google Drive API</b> din „Enabled APIs", apoi <b>Create credentials → API key</b>.</li>
-          <li>Lipește cheia aici:</li>
-        </ol>
-        <input class="search" id="prog-key" placeholder="Cheia API Google (AIza…)">
-        <input class="search" id="prog-folder" placeholder="Linkul folderului din Drive (doar dacă îl schimbi)">
-        <button class="sp-btn" id="prog-save">Salvează</button>
-        <p style="margin-top:10px">Fără cheie, se folosește folderul <code>program/</code> din repo (urci poza prin push, ca la înregistrări).</p>
-      </div>
-
       <a id="prog-link" target="_blank" hidden><img id="prog-img" alt="Programul buletinului"></a>
-      <div class="empty" id="prog-empty">Nicio poză încă — configurează Drive din ⚙ sau urcă o poză în folderul <b>program/</b> din repo.</div>
+      <div class="empty" id="prog-empty">Nicio poză încă.</div>
     </div>
   </section>
 </main>
@@ -1060,10 +1030,10 @@ function setTab(t) {
 document.querySelectorAll('#src-tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
 
 /* ───────────────────────── Programul buletinului (poza din Drive / repo) ───────────────────────── */
+/* Folderul public de Google Drive al echipei + cheia API (fixe, nu se configurează din site) */
 const PROG = {
-  /* folderul echipei din Google Drive (public) — setat din start */
-  folder: localStorage.getItem('prog.folder') || '15BeAo8wygvG-4RbHoBojLxONP9o-VBcQ',
-  key: localStorage.getItem('prog.key') || ''
+  folder: '15BeAo8wygvG-4RbHoBojLxONP9o-VBcQ',
+  key: localStorage.getItem('prog.key') || ''  // cheia API Google Drive — se lipește aici când există
 };
 function progShow(src, href) {
   $('prog-img').src = src;
@@ -1106,25 +1076,9 @@ async function progLoad() {
       .filter(f => f.type === 'file' && /\.(jpe?g|png|webp|gif)$/i.test(f.name))
       .sort((a, b) => b.name.localeCompare(a.name, undefined, { numeric: true }));
     if (imgs.length) progShow('program/' + encodeURIComponent(imgs[0].name));
-    else progNone(PROG.folder && !PROG.key
-      ? 'Folderul Drive e setat — mai trebuie cheia API. Apasă ⚙ pentru pași.'
-      : undefined);
+    else progNone();
   } catch { progNone(); }
 }
-$('prog-refresh').onclick = () => { progLoad(); toast('Reîncarc programul…'); };
-$('prog-setup-btn').onclick = () => { $('prog-setup').hidden = !$('prog-setup').hidden; };
-$('prog-folder').value = PROG.folder ? 'https://drive.google.com/drive/folders/' + PROG.folder : '';
-$('prog-key').value = PROG.key;
-$('prog-save').onclick = () => {
-  const m = $('prog-folder').value.match(/folders\/([A-Za-z0-9_-]+)/);
-  PROG.folder = m ? m[1] : $('prog-folder').value.trim();
-  PROG.key = $('prog-key').value.trim();
-  localStorage.setItem('prog.folder', PROG.folder);
-  localStorage.setItem('prog.key', PROG.key);
-  $('prog-setup').hidden = true;
-  progLoad();
-  toast('Setări salvate ✓');
-};
 
 /* ───────────────────────── Fluxul emisiei ───────────────────────── */
 const flowbtn = $('flowbtn');
