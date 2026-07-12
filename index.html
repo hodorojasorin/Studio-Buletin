@@ -185,8 +185,9 @@
   #prog-link { display: block; margin-top: 12px; }
   #prog-link[hidden] { display: none; }
   #prog-img {
-    display: block; width: 100%; border-radius: 10px;
-    border: 1px solid var(--navy-line); cursor: zoom-in;
+    /* pozele sunt portret (1080×1920) — limităm înălțimea ca să nu domine pagina */
+    display: block; max-width: 100%; max-height: 60vh; width: auto; margin: 0 auto;
+    border-radius: 10px; border: 1px solid var(--navy-line); cursor: zoom-in;
   }
   #prog-setup { margin-top: 14px; border-top: 1px solid var(--navy-line); padding-top: 14px; font-size: 12.5px; color: var(--ink-dim); }
   #prog-setup ol { margin: 8px 0 12px 18px; display: flex; flex-direction: column; gap: 5px; }
