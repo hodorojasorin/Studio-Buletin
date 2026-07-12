@@ -157,6 +157,13 @@
     border-radius: 5px; padding: 1px 7px; font-size: 11px;
   }
 
+  .src-note {
+    font-size: 12.5px; color: var(--ink-dim); line-height: 1.55;
+    background: rgba(32,164,162,.07); border: 1px solid rgba(32,164,162,.25);
+    border-radius: 10px; padding: 10px 14px; margin-bottom: 6px;
+  }
+  .src-note b, .src-note i { color: var(--ink); }
+
   /* ── Spotify ────────────────────────────── */
   .sp-card {
     background: var(--navy-card); border: 1px solid var(--navy-line);
@@ -351,25 +358,29 @@
 
   <!-- ── SURSE MUZICĂ ── -->
   <section>
-    <div class="panel-title">Spotify</div>
+    <div class="panel-title">Piesele zilei</div>
+    <p class="src-note">În fiecare zi alegeți piesa de <b>deschidere</b> și cea de <b>încheiere</b> din oricare sursă de mai jos — căutați pe Spotify <i>sau</i> trageți fișierele manual, apoi apăsați <b>Intro</b> / <b>Outro</b> pe piesă. Se pot și combina.</p>
+
+    <div class="panel-title">Varianta 1 · Spotify</div>
 
     <div class="sp-card">
       <div class="sp-row">
         <div class="sp-logo">♫</div>
         <div class="sp-info">
           <b>Spotify Web Player</b>
-          <small id="sp-status">neconectat — necesită cont Premium</small>
+          <small id="sp-status">neconectat — apasă „Conectează" (cont Premium)</small>
         </div>
         <button class="sp-btn ghost" id="sp-setup-btn">⚙ Setări</button>
         <button class="sp-btn" id="sp-connect">Conectează</button>
       </div>
 
       <div id="sp-setup" hidden>
-        Configurare unică (2 minute):
+        Aplicația Spotify a echipei e deja configurată — nu trebuie schimbat nimic aici.
         <ol>
-          <li>Intră pe <a href="https://developer.spotify.com/dashboard" target="_blank">developer.spotify.com/dashboard</a> și apasă <b>Create app</b>.</li>
-          <li>La <b>Redirect URI</b> pune exact: <code id="sp-redirect"></code></li>
-          <li>Bifează <b>Web API</b> + <b>Web Playback SDK</b>, salvează, apoi copiază <b>Client ID</b> aici:</li>
+          <li>Dacă site-ul rulează pe o adresă nouă, adaug-o ca <b>Redirect URI</b> în
+            <a href="https://developer.spotify.com/dashboard" target="_blank">Spotify Dashboard</a>.
+            Adresa curentă: <code id="sp-redirect"></code></li>
+          <li>Client ID-ul se schimbă doar dacă echipa trece pe altă aplicație Spotify:</li>
         </ol>
         <input class="search" id="sp-clientid" placeholder="Client ID din Spotify Dashboard">
         <button class="sp-btn" id="sp-save">Salvează Client ID</button>
@@ -379,7 +390,7 @@
       <ul id="sp-results"></ul>
     </div>
 
-    <div class="panel-title">Biblioteca locală</div>
+    <div class="panel-title">Varianta 2 · Manual, drag &amp; drop</div>
 
     <div class="drop" id="drop">
       <strong>Trage piesele aici</strong> sau apasă ca să le alegi<br>
@@ -502,8 +513,9 @@ function fade(el, target, ms) {
 }
 
 /* ───────────────────────── Spotify (Web Playback SDK + PKCE) ───────────────────────── */
+const SP_DEFAULT_CLIENT_ID = 'cbb8be17b50e48d989caba653c984e42'; // aplicația Spotify a echipei
 const SP = {
-  clientId: localStorage.getItem('sp.clientId') || '',
+  clientId: localStorage.getItem('sp.clientId') || SP_DEFAULT_CLIENT_ID,
   tokens: JSON.parse(localStorage.getItem('sp.tokens') || 'null'),
   player: null, deviceId: null, ready: false, fadeTimer: null,
   lastPos: 0, state: null,
