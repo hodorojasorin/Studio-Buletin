@@ -218,6 +218,9 @@
     width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
     background: var(--navy); color: #fff; display: grid; place-items: center; font-size: 17px;
   }
+  .lib-lock { display: flex; gap: 8px; margin-top: 12px; }
+  .lib-lock .search { margin-bottom: 0; flex: 1; letter-spacing: 4px; }
+  .lib-lock .sp-btn { flex-shrink: 0; }
   #lib-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 12px; max-height: 44vh; overflow-y: auto; scrollbar-gutter: stable; }
   #lib-list:empty { margin-top: 0; }
   .badge-rec {
@@ -348,10 +351,16 @@
           <b>Biblioteca locală</b>
           <small>înregistrări din folderul <code>inregistrari/</code> al platformei</small>
         </div>
-        <button class="iconbtn" id="lib-refresh" title="Reîncarcă lista">⟳</button>
+        <button class="iconbtn" id="lib-refresh" title="Reîncarcă lista" hidden>⟳</button>
       </div>
-      <ul id="lib-list"></ul>
-      <div class="empty" id="lib-empty">Nicio înregistrare încă — urcă fișiere audio în folderul <b>inregistrari/</b> din repo și apar aici automat.</div>
+      <div class="lib-lock" id="lib-lock">
+        <input class="search" id="lib-pin" type="password" inputmode="numeric" maxlength="8" placeholder="PIN de acces">
+        <button class="sp-btn" id="lib-unlock">Deblochează</button>
+      </div>
+      <div id="lib-content" hidden>
+        <ul id="lib-list"></ul>
+        <div class="empty" id="lib-empty">Nicio înregistrare încă — urcă fișiere audio în folderul <b>inregistrari/</b> din repo și apar aici automat.</div>
+      </div>
     </div>
   </section>
 
@@ -851,6 +860,31 @@ async function libLoad() {
 }
 $('lib-refresh').onclick = () => { libLoad(); toast('Reîncarc lista înregistrărilor…'); };
 
+/* ── PIN de acces la biblioteca locală ── */
+const LIB_PIN = '1986';
+function libUnlocked() { return sessionStorage.getItem('lib.unlocked') === '1'; }
+function renderLibLock() {
+  const ok = libUnlocked();
+  $('lib-lock').style.display = ok ? 'none' : 'flex';
+  $('lib-content').hidden = !ok;
+  $('lib-refresh').hidden = !ok;
+}
+function libTryUnlock() {
+  if ($('lib-pin').value === LIB_PIN) {
+    sessionStorage.setItem('lib.unlocked', '1');
+    $('lib-pin').value = '';
+    renderLibLock();
+    libLoad();
+    toast('Bibliotecă deblocată ✓');
+  } else {
+    $('lib-pin').value = '';
+    $('lib-pin').focus();
+    toast('PIN greșit');
+  }
+}
+$('lib-unlock').onclick = libTryUnlock;
+$('lib-pin').addEventListener('keydown', e => { if (e.key === 'Enter') libTryUnlock(); });
+
 function renderLib() {
   const ul = $('lib-list');
   ul.innerHTML = '';
@@ -1229,7 +1263,8 @@ document.addEventListener('keydown', e => {
   renderYtList();
   renderAssign();
   updateFlowBtn(); markSteps();
-  libLoad();
+  renderLibLock();
+  if (libUnlocked()) libLoad();
 })();
 </script>
 </body>
