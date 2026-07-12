@@ -15,7 +15,7 @@
     --navy-card: #ffffff;   /* fundal carduri */
     --navy-line: #d7e0e9;   /* borduri */
     --red: #df163c;
-    --teal: #20a4a2;
+    --teal: #1a293a;  /* culoarea de accent (navy CEITI) */
     --ink: #1a293a;
     --ink-dim: #64798d;
     --radius: 14px;
@@ -97,7 +97,7 @@
     transition: border-color .3s, box-shadow .3s, opacity .3s;
     opacity: .62;
   }
-  .step.active { opacity: 1; border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal), 0 8px 30px rgba(32,164,162,.18); }
+  .step.active { opacity: 1; border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal), 0 8px 30px rgba(26,41,58,.18); }
   .step.done { opacity: .85; }
   .step.done .step-num { background: var(--teal); color: #fff; }
   .step-num {
@@ -158,7 +158,7 @@
   .bigbtn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
   .bigbtn:active:not(:disabled) { transform: translateY(1px); }
   .bigbtn:disabled { background: var(--navy-line); box-shadow: none; cursor: not-allowed; color: var(--ink-dim); }
-  .bigbtn.teal { background: var(--teal); box-shadow: 0 8px 30px rgba(32,164,162,.35); }
+  .bigbtn.teal { background: var(--teal); box-shadow: 0 8px 30px rgba(26,41,58,.35); }
   .hint { text-align: center; font-size: 12px; color: var(--ink-dim); margin-top: 10px; }
   .hint kbd {
     font-family: inherit; background: var(--navy-deep); border: 1px solid var(--navy-line);
