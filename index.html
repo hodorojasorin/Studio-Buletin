@@ -21,7 +21,7 @@
     --radius: 14px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { height: 100%; scrollbar-gutter: stable; }
+  html { height: 100%; overflow-y: scroll; scrollbar-gutter: stable; }
   body {
     font-family: 'Open Sans', system-ui, sans-serif;
     background: radial-gradient(1200px 700px at 75% -10%, #ffffff 0%, #f3f7fa 45%, #e9eff5 100%);
@@ -191,7 +191,8 @@
   #sp-setup .search { margin: 0 0 10px; }
   #sp-search { margin-top: 12px; margin-bottom: 10px; display: none; }
   #sp-search.show { display: block; }
-  #sp-results { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 44vh; overflow-y: auto; padding-right: 4px; scrollbar-gutter: stable; }
+  #sp-results { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 44vh; overflow-y: scroll; padding-right: 4px; }
+  #sp-results:empty { overflow-y: hidden; }
   #sp-results::-webkit-scrollbar { width: 8px; }
   #sp-results::-webkit-scrollbar-thumb { background: var(--navy-line); border-radius: 8px; }
   .badge-sp {
