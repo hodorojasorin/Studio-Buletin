@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>CEITI — Studio Buletin</title>
+<link rel="icon" type="image/png" href="favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
@@ -20,7 +21,7 @@
     --radius: 14px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; }
+  html { height: 100%; scrollbar-gutter: stable; }
   body {
     font-family: 'Open Sans', system-ui, sans-serif;
     background: radial-gradient(1200px 700px at 75% -10%, #ffffff 0%, #f3f7fa 45%, #e9eff5 100%);
@@ -45,25 +46,37 @@
   #clock { font-family: 'Roboto Slab', serif; font-weight: 700; font-size: 26px; font-variant-numeric: tabular-nums; }
   #dateline { font-size: 12px; color: var(--ink-dim); text-transform: capitalize; }
 
-  /* ── ON AIR banner ──────────────────────── */
+  /* ── ON AIR — bandă rezervată sub header (nu mută nimic) ── */
   #onair {
-    display: none; align-items: center; justify-content: center; gap: 12px;
+    height: 44px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
     background: var(--red); color: #fff;
-    font-family: 'Roboto Slab', serif; font-weight: 900; font-size: 18px; letter-spacing: 6px;
-    padding: 10px; text-align: center;
+    font-family: 'Roboto Slab', serif; font-weight: 900; font-size: 17px; letter-spacing: 6px;
+    text-align: center;
+    opacity: 0; pointer-events: none; transition: opacity .35s;
   }
-  #onair.live { display: flex; animation: pulse 1.4s ease-in-out infinite; }
+  #onair.live { opacity: 1; animation: pulse 1.4s ease-in-out infinite; }
   #onair .dot { width: 12px; height: 12px; border-radius: 50%; background: #fff; animation: blink 1.4s ease-in-out infinite; }
   @keyframes pulse { 50% { background: #b8102f; } }
   @keyframes blink { 50% { opacity: .25; } }
 
-  /* ── Layout ─────────────────────────────── */
+  /* ── Layout: Spotify | Etape | YouTube ──── */
   main {
-    display: grid; grid-template-columns: 1.25fr .95fr; gap: 22px;
-    max-width: 1240px; margin: 0 auto; padding: 26px 28px 120px;
+    display: grid;
+    grid-template-areas: "spotify flow youtube";
+    grid-template-columns: .92fr 1.16fr .92fr;
+    gap: 22px;
+    max-width: 1560px; margin: 0 auto; padding: 22px 28px 120px;
   }
-  @media (max-width: 940px) { main { grid-template-columns: 1fr; } }
-
+  #col-spotify { grid-area: spotify; }
+  #col-flow { grid-area: flow; }
+  #col-youtube { grid-area: youtube; }
+  @media (max-width: 1120px) {
+    main {
+      grid-template-areas: "flow" "spotify" "youtube";
+      grid-template-columns: 1fr;
+    }
+  }
 
   /* ── Flow steps ─────────────────────────── */
   .step {
@@ -144,7 +157,7 @@
     border-radius: 5px; padding: 1px 7px; font-size: 11px;
   }
 
-  /* ── Spotify ────────────────────────────── */
+  /* ── Carduri surse ──────────────────────── */
   .sp-card {
     background: var(--navy-card); border: 1px solid var(--navy-line);
     border-radius: var(--radius); padding: 14px; margin-bottom: 14px;
@@ -159,6 +172,10 @@
   .sp-info b { display: block; font-size: 14px; }
   .sp-info small { color: var(--ink-dim); font-size: 11.5px; }
   .sp-info small.ok { color: var(--teal); font-weight: 600; }
+  .sp-info small code {
+    background: var(--navy-deep); border: 1px solid var(--navy-line); border-radius: 4px;
+    padding: 0 4px; font-size: 10.5px;
+  }
   .sp-btn {
     font: 700 12px 'Open Sans', sans-serif; letter-spacing: .5px;
     padding: 9px 16px; border-radius: 9px; border: none; cursor: pointer;
@@ -177,7 +194,7 @@
   #sp-setup .search { margin: 0 0 10px; }
   #sp-search { margin-top: 12px; margin-bottom: 10px; display: none; }
   #sp-search.show { display: block; }
-  #sp-results { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 34vh; overflow-y: auto; padding-right: 4px; }
+  #sp-results { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 44vh; overflow-y: auto; padding-right: 4px; scrollbar-gutter: stable; }
   #sp-results::-webkit-scrollbar { width: 8px; }
   #sp-results::-webkit-scrollbar-thumb { background: var(--navy-line); border-radius: 8px; }
   .badge-sp {
@@ -196,22 +213,27 @@
   #yt-playerwrap { max-height: 0; overflow: hidden; transition: max-height .35s; }
   #yt-playerwrap.show { max-height: 300px; margin-top: 12px; }
   #yt-playerwrap iframe, #yt-player { width: 100%; aspect-ratio: 16/9; max-height: 280px; border: 0; border-radius: 10px; display: block; }
-  #yt-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 12px; max-height: 30vh; overflow-y: auto; }
+  #yt-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 12px; max-height: 44vh; overflow-y: auto; scrollbar-gutter: stable; }
   #yt-list:empty { margin-top: 0; }
   .badge-yt {
     display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: 1px;
     background: #FF0000; color: #fff; border-radius: 4px; padding: 1px 5px; vertical-align: 1px;
   }
 
-  /* ── Library ────────────────────────────── */
-  .drop {
-    border: 2px dashed var(--navy-line); border-radius: var(--radius);
-    padding: 22px; text-align: center; cursor: pointer;
-    color: var(--ink-dim); font-size: 13.5px;
-    transition: all .2s; margin-bottom: 14px;
+  /* ── Biblioteca locală (înregistrări din repo) ── */
+  .lib-logo {
+    width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+    background: var(--navy); color: #fff; display: grid; place-items: center; font-size: 17px;
   }
-  .drop strong { color: var(--teal); font-weight: 700; }
-  .drop.over { border-color: var(--teal); background: rgba(32,164,162,.08); color: var(--ink); }
+  #lib-list { list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 12px; max-height: 44vh; overflow-y: auto; scrollbar-gutter: stable; }
+  #lib-list:empty { margin-top: 0; }
+  .badge-rec {
+    display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: 1px;
+    background: var(--navy); color: #fff; border-radius: 4px; padding: 1px 5px; vertical-align: 1px;
+  }
+  .chip.set-onair.on { background: var(--red); border-color: var(--red); color: #fff; }
+
+  /* ── Rânduri piese ──────────────────────── */
   .search {
     width: 100%; padding: 12px 16px; margin-bottom: 12px;
     border-radius: 10px; border: 1px solid var(--navy-line);
@@ -221,9 +243,6 @@
   }
   .search:focus { border-color: var(--teal); }
   .search::placeholder { color: var(--ink-dim); font-weight: 400; }
-  #tracklist { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 40vh; overflow-y: auto; padding-right: 4px; }
-  #tracklist::-webkit-scrollbar { width: 8px; }
-  #tracklist::-webkit-scrollbar-thumb { background: var(--navy-line); border-radius: 8px; }
   .track {
     background: var(--navy-card); border: 1px solid var(--navy-line); border-radius: 10px;
     padding: 10px 12px; display: flex; align-items: center; gap: 10px;
@@ -245,7 +264,7 @@
   }
   .chip:hover { color: var(--ink); border-color: var(--ink-dim); }
   .chip.set-intro.on, .chip.set-outro.on { background: var(--teal); border-color: var(--teal); color: #fff; }
-  .empty { text-align: center; color: var(--ink-dim); font-size: 13px; padding: 30px 10px; }
+  .empty { text-align: center; color: var(--ink-dim); font-size: 13px; padding: 20px 10px; }
 
   /* ── Bottom transport bar ───────────────── */
   .transport {
@@ -282,8 +301,6 @@
 </head>
 <body>
 
-<div id="onair"><span class="dot"></span> ON AIR — SPEAKERII VORBESC <span class="dot"></span></div>
-
 <header>
   <img class="brand-logo" src="epm-logo.png" alt="Echipa de Producție Multimedia">
   <h1 class="brand-title">STUDIO <span>BULETIN</span></h1>
@@ -293,63 +310,11 @@
   </div>
 </header>
 
+<div id="onair"><span class="dot"></span> ON AIR — SPEAKERII VORBESC <span class="dot"></span></div>
+
 <main>
-  <!-- ── FLUXUL EMISIEI ── -->
-  <section>
-    <div class="step" id="step1" data-step="intro">
-      <div class="step-num">1</div>
-      <div class="step-body">
-        <h3>Piesa de deschidere <span class="eq" id="eq-intro"><i></i><i></i><i></i><i></i></span></h3>
-        <div class="desc">Se aude pe holuri până sunt gata speakerii · <span class="track-name missing" id="intro-name">nicio piesă aleasă</span></div>
-      </div>
-      <label class="switch" title="Repetă piesa până treci la jingle">
-        <input type="checkbox" id="loop-intro" checked><span class="rail"></span> Loop
-      </label>
-      <div class="progress-row" id="prog-intro-row">
-        <span id="prog-intro-cur">0:00</span>
-        <input type="range" class="seek" id="seek-intro" min="0" max="1000" value="0" title="Derulează prin piesă">
-        <span id="prog-intro-dur">0:00</span>
-      </div>
-    </div>
-
-    <div class="step" id="step2" data-step="jingle">
-      <div class="step-num">2</div>
-      <div class="step-body">
-        <h3>Jingle Buletin <span class="eq" id="eq-jingle"><i></i><i></i><i></i><i></i></span></h3>
-        <div class="desc">Atenționează elevii că în câteva secunde întră speakerii!</div>
-      </div>
-      <button class="iconbtn" id="preview-jingle" title="Ascultă jingle-ul (test)">▶</button>
-    </div>
-
-    <div class="step" id="step3" data-step="onair">
-      <div class="step-num">3</div>
-      <div class="step-body">
-        <h3>ON AIR — Buletinul Informațional al zilei</h3>
-        <div class="desc">Liniște în încăpere, orice sunet poate fi auzit pe holurile instituției. Speakerii sunt rugați să vorbească tare &amp; expresiv.</div>
-      </div>
-      <span style="font-size:22px">🎙</span>
-    </div>
-
-    <div class="step" id="step4" data-step="outro">
-      <div class="step-num">4</div>
-      <div class="step-body">
-        <h3>Piesa de încheiere <span class="eq" id="eq-outro"><i></i><i></i><i></i><i></i></span></h3>
-        <div class="desc">A doua piesă a zilei, după buletin · <span class="track-name missing" id="outro-name">nicio piesă aleasă</span></div>
-      </div>
-      <div></div>
-      <div class="progress-row" id="prog-outro-row">
-        <span id="prog-outro-cur">0:00</span>
-        <input type="range" class="seek" id="seek-outro" min="0" max="1000" value="0" title="Derulează prin piesă">
-        <span id="prog-outro-dur">0:00</span>
-      </div>
-    </div>
-
-    <button class="bigbtn" id="flowbtn" disabled>ALEGE PIESELE ZILEI →</button>
-    <div class="hint"><kbd>Space</kbd> pasul următor · <kbd>F</kbd> fade out · <kbd>Esc</kbd> stop tot</div>
-  </section>
-
-  <!-- ── SURSE MUZICĂ ── -->
-  <section>
+  <!-- ── SPOTIFY (stânga) ── -->
+  <section id="col-spotify">
     <div class="sp-card">
       <div class="sp-row">
         <div class="sp-logo">
@@ -380,6 +345,82 @@
       <ul id="sp-results"></ul>
     </div>
 
+    <!-- ── BIBLIOTECA LOCALĂ (înregistrări din repo) ── -->
+    <div class="sp-card">
+      <div class="sp-row">
+        <div class="lib-logo">🎙</div>
+        <div class="sp-info">
+          <b>Biblioteca locală</b>
+          <small>înregistrări din folderul <code>inregistrari/</code> al platformei</small>
+        </div>
+        <button class="iconbtn" id="lib-refresh" title="Reîncarcă lista">⟳</button>
+      </div>
+      <ul id="lib-list"></ul>
+      <div class="empty" id="lib-empty">Nicio înregistrare încă — urcă fișiere audio în folderul <b>inregistrari/</b> din repo și apar aici automat.</div>
+    </div>
+  </section>
+
+  <!-- ── ETAPELE EMISIEI (mijloc) ── -->
+  <section id="col-flow">
+    <div class="step" id="step1" data-step="intro">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Piesa de deschidere <span class="eq" id="eq-intro"><i></i><i></i><i></i><i></i></span></h3>
+        <div class="desc">Se aude pe holuri până sunt gata speakerii · <span class="track-name missing" id="intro-name">nicio piesă aleasă</span></div>
+      </div>
+      <label class="switch" title="Repetă piesa până treci la jingle">
+        <input type="checkbox" id="loop-intro" checked><span class="rail"></span> Loop
+      </label>
+      <div class="progress-row" id="prog-intro-row">
+        <span id="prog-intro-cur">0:00</span>
+        <input type="range" class="seek" id="seek-intro" min="0" max="1000" value="0" title="Derulează prin piesă">
+        <span id="prog-intro-dur">0:00</span>
+      </div>
+    </div>
+
+    <div class="step" id="step2" data-step="jingle">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Jingle Buletin <span class="eq" id="eq-jingle"><i></i><i></i><i></i><i></i></span></h3>
+        <div class="desc">Atenționează elevii că în câteva secunde întră speakerii!</div>
+      </div>
+      <button class="iconbtn" id="preview-jingle" title="Ascultă jingle-ul (test)">▶</button>
+    </div>
+
+    <div class="step" id="step3" data-step="onair">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>ON AIR — Buletinul Informațional al zilei</h3>
+        <div class="desc">Liniște în încăpere, orice sunet poate fi auzit pe holurile instituției. Speakerii sunt rugați să vorbească tare &amp; expresiv. · <span class="track-name" id="onair-name">speakerii live</span></div>
+      </div>
+      <span style="font-size:22px">🎙</span>
+      <div class="progress-row" id="prog-onair-row">
+        <span id="prog-onair-cur">0:00</span>
+        <input type="range" class="seek" id="seek-onair" min="0" max="1000" value="0" title="Derulează prin înregistrare">
+        <span id="prog-onair-dur">0:00</span>
+      </div>
+    </div>
+
+    <div class="step" id="step4" data-step="outro">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h3>Piesa de încheiere <span class="eq" id="eq-outro"><i></i><i></i><i></i><i></i></span></h3>
+        <div class="desc">A doua piesă a zilei, după buletin · <span class="track-name missing" id="outro-name">nicio piesă aleasă</span></div>
+      </div>
+      <div></div>
+      <div class="progress-row" id="prog-outro-row">
+        <span id="prog-outro-cur">0:00</span>
+        <input type="range" class="seek" id="seek-outro" min="0" max="1000" value="0" title="Derulează prin piesă">
+        <span id="prog-outro-dur">0:00</span>
+      </div>
+    </div>
+
+    <button class="bigbtn" id="flowbtn" disabled>ALEGE PIESELE ZILEI →</button>
+    <div class="hint"><kbd>Space</kbd> pasul următor · <kbd>F</kbd> fade out · <kbd>Esc</kbd> stop tot</div>
+  </section>
+
+  <!-- ── YOUTUBE (dreapta) ── -->
+  <section id="col-youtube">
     <div class="sp-card">
       <div class="sp-row">
         <div class="yt-logo">
@@ -397,17 +438,6 @@
       <div id="yt-playerwrap"><div id="yt-player"></div></div>
       <ul id="yt-list"></ul>
     </div>
-
-    <div class="drop" id="drop">
-      <strong>Trage piesele aici</strong> sau apasă ca să le alegi<br>
-      <small>MP3 / WAV / M4A — rămân salvate în browser, fără niciun server</small>
-      <input type="file" id="filein" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac" multiple hidden>
-    </div>
-
-    <input class="search" id="search" type="search" placeholder="Caută în bibliotecă…">
-
-    <ul id="tracklist"></ul>
-    <div class="empty" id="empty">Biblioteca e goală — încarcă primele piese 🎵</div>
   </section>
 </main>
 
@@ -440,54 +470,23 @@ function tick() {
 }
 tick(); setInterval(tick, 1000);
 
-/* ───────────────────────── IndexedDB ───────────────────────── */
-const DB_NAME = 'ceiti-buletin', STORE = 'tracks';
-let db;
-function openDB() {
-  return new Promise((res, rej) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = () => req.result.createObjectStore(STORE, { keyPath: 'id' });
-    req.onsuccess = () => { db = req.result; res(); };
-    req.onerror = () => rej(req.error);
-  });
-}
-function dbPut(track) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).put(track);
-    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
-  });
-}
-function dbAll() {
-  return new Promise((res, rej) => {
-    const req = db.transaction(STORE).objectStore(STORE).getAll();
-    req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error);
-  });
-}
-function dbDelete(id) {
-  return new Promise((res, rej) => {
-    const tx = db.transaction(STORE, 'readwrite');
-    tx.objectStore(STORE).delete(id);
-    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
-  });
-}
-
 /* ───────────────────────── Stare ───────────────────────── */
-let tracks = [];
 /* assign.intro / assign.outro:
-   { type:'local', id }  sau  { type:'sp', uri, name, dur } */
-let assign = JSON.parse(localStorage.getItem('buletin.assign') || '{"intro":null,"outro":null}');
-for (const slot of ['intro', 'outro'])
-  if (typeof assign[slot] === 'string') assign[slot] = { type: 'local', id: assign[slot] };
+     { type:'local', file, name }  |  { type:'sp', uri, name, dur }  |  { type:'yt', id, name }
+   assign.onair (opțional): { type:'local', file, name } — înregistrarea buletinului */
+let assign = JSON.parse(localStorage.getItem('buletin.assign') || '{"intro":null,"outro":null,"onair":null}');
+for (const slot of ['intro', 'outro', 'onair']) {
+  const a = assign[slot];
+  if (typeof a === 'string' || (a?.type === 'local' && !a.file)) assign[slot] = null;
+}
 
 let masterVol = +(localStorage.getItem('buletin.vol') ?? 90) / 100;
 let step = 'idle'; // idle → intro → jingle → onair → outro
-let musicSrc = null; // 'local' | 'sp' — ce sursă redă pasul curent
+let musicSrc = null; // 'local' | 'sp' | 'yt' — ce sursă redă acum
 const music = document.getElementById('music');
 const jingle = document.getElementById('jingle');
 const previewer = document.getElementById('previewer');
-let previewingId = null;
-let currentURL = null;
+let previewingFile = null;
 
 const $ = id => document.getElementById(id);
 const toastEl = $('toast');
@@ -504,6 +503,8 @@ function fmt(s) {
   return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 }
 function esc(s) { return s.replace(/</g, '&lt;'); }
+function saveAssign() { localStorage.setItem('buletin.assign', JSON.stringify(assign)); }
+function renderAllLists() { renderLib(); renderYtList(); refreshSpChips(); renderAssign(); }
 
 /* ───────────────────────── Fade audio local ───────────────────────── */
 function fade(el, target, ms) {
@@ -587,7 +588,7 @@ function spDisconnect() {
 function spRenderStatus() {
   const st = $('sp-status'), btn = $('sp-connect'), search = $('sp-search');
   if (!SP.tokens) {
-    st.textContent = 'neconectat — necesită cont Premium'; st.className = '';
+    st.textContent = 'neconectat — apasă „Conectează" (cont Premium)'; st.className = '';
     btn.textContent = 'Conectează';
     search.classList.remove('show'); $('sp-results').innerHTML = '';
   } else if (!SP.ready) {
@@ -690,6 +691,7 @@ function renderSpResults(items) {
     li.querySelector('.play').onclick = () => {
       if (step !== 'idle') { toast('Emisia e în desfășurare — nu porni alt sunet'); return; }
       if (!SP.ready) { toast('Playerul Spotify nu e gata încă'); return; }
+      stopPreview();
       spPlay(t.uri, { loop: false });
       updateNow('Test: ' + t.name);
       musicSrc = 'sp';
@@ -704,14 +706,10 @@ function isAssigned(slot, spTrack) {
 }
 function setAssignSp(slot, t) {
   assign[slot] = isAssigned(slot, t) ? null : { type: 'sp', uri: t.uri, name: t.name, dur: t.dur };
-  localStorage.setItem('buletin.assign', JSON.stringify(assign));
-  refreshSpChips(); renderList(); renderAssign(); renderYtList();
+  saveAssign();
+  renderAllLists();
 }
 function refreshSpChips() {
-  for (const li of $('sp-results').children) {
-    /* re-render simplu: chips-urile se refac la următoarea căutare;
-       aici doar sincronizăm clasa 'on' după numele afișat */
-  }
   const q = $('sp-search').value.trim();
   if (q) $('sp-search').dispatchEvent(new Event('input'));
 }
@@ -818,8 +816,8 @@ function renderYtList() {
       localStorage.setItem('buletin.ytlist', JSON.stringify(ytLib));
       for (const slot of ['intro', 'outro'])
         if (assign[slot]?.type === 'yt' && assign[slot].id === v.id) assign[slot] = null;
-      localStorage.setItem('buletin.assign', JSON.stringify(assign));
-      renderYtList(); renderAssign(); renderList();
+      saveAssign();
+      renderAllLists();
     };
     ul.appendChild(li);
   }
@@ -827,55 +825,92 @@ function renderYtList() {
 function setAssignYt(slot, v) {
   const on = assign[slot]?.type === 'yt' && assign[slot].id === v.id;
   assign[slot] = on ? null : { type: 'yt', id: v.id, name: v.name };
-  localStorage.setItem('buletin.assign', JSON.stringify(assign));
-  renderList(); renderAssign(); refreshSpChips(); renderYtList();
+  saveAssign();
+  renderAllLists();
 }
 
-/* ───────────────────────── Bibliotecă locală ───────────────────────── */
-const listEl = $('tracklist'), emptyEl = $('empty'), searchEl = $('search');
+/* ───────────────────────── Biblioteca locală (folderul inregistrari/ din repo) ───────────────────────── */
+const LIB_REPO = 'hodorojasorin/Studio-Buletin';
+const LIB_PATH = 'inregistrari';
+let libFiles = []; // { name, file }
 
-function trackById(id) { return tracks.find(t => t.id === id); }
-
-function renderList() {
-  const q = searchEl.value.trim().toLowerCase();
-  const shown = tracks
-    .filter(t => t.name.toLowerCase().includes(q))
-    .sort((a, b) => b.addedAt - a.addedAt);
-  listEl.innerHTML = '';
-  emptyEl.style.display = shown.length ? 'none' : 'block';
-  emptyEl.textContent = tracks.length && !shown.length
-    ? 'Nicio piesă nu se potrivește căutării 🔍'
-    : 'Biblioteca e goală — încarcă primele piese 🎵';
-  for (const t of shown) {
-    const li = document.createElement('li');
-    li.className = 'track';
-    const introOn = assign.intro?.type === 'local' && assign.intro.id === t.id;
-    const outroOn = assign.outro?.type === 'local' && assign.outro.id === t.id;
-    li.innerHTML = `
-      <button class="iconbtn preview" title="Ascultă">${previewingId === t.id ? '⏸' : '▶'}</button>
-      <div class="tname"><b>${esc(t.name)}</b><small>${fmt(t.duration)}</small></div>
-      <button class="chip set-intro ${introOn ? 'on' : ''}" title="Setează ca piesă de deschidere">Intro</button>
-      <button class="chip set-outro ${outroOn ? 'on' : ''}" title="Setează ca piesă de încheiere">Outro</button>
-      <button class="iconbtn danger del" title="Șterge din bibliotecă">✕</button>`;
-    li.querySelector('.preview').onclick = () => togglePreview(t);
-    li.querySelector('.set-intro').onclick = () => setAssign('intro', t);
-    li.querySelector('.set-outro').onclick = () => setAssign('outro', t);
-    li.querySelector('.del').onclick = () => removeTrack(t);
-    listEl.appendChild(li);
+async function libLoad() {
+  try {
+    const r = await fetch(`https://api.github.com/repos/${LIB_REPO}/contents/${LIB_PATH}?t=` + Date.now(),
+      { headers: { Accept: 'application/vnd.github+json' } });
+    if (r.status === 404) { libFiles = []; renderLib(); return; }
+    if (!r.ok) throw new Error();
+    const items = await r.json();
+    libFiles = (Array.isArray(items) ? items : [])
+      .filter(f => f.type === 'file' && /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name))
+      .map(f => ({ name: f.name.replace(/\.[^.]+$/, ''), file: LIB_PATH + '/' + f.name }));
+    renderLib();
+  } catch {
+    $('lib-empty').style.display = 'block';
+    $('lib-empty').innerHTML = 'Nu am putut citi folderul <b>inregistrari/</b> de pe GitHub — verifică conexiunea.';
   }
 }
+$('lib-refresh').onclick = () => { libLoad(); toast('Reîncarc lista înregistrărilor…'); };
 
-function setAssign(slot, t) {
-  const on = assign[slot]?.type === 'local' && assign[slot].id === t.id;
-  assign[slot] = on ? null : { type: 'local', id: t.id };
-  localStorage.setItem('buletin.assign', JSON.stringify(assign));
-  renderList(); renderAssign(); refreshSpChips(); renderYtList();
+function renderLib() {
+  const ul = $('lib-list');
+  ul.innerHTML = '';
+  $('lib-empty').style.display = libFiles.length ? 'none' : 'block';
+  for (const f of libFiles) {
+    const introOn = assign.intro?.type === 'local' && assign.intro.file === f.file;
+    const outroOn = assign.outro?.type === 'local' && assign.outro.file === f.file;
+    const onairOn = assign.onair?.file === f.file;
+    const li = document.createElement('li');
+    li.className = 'track';
+    li.innerHTML = `
+      <button class="iconbtn preview" title="Ascultă">${previewingFile === f.file ? '⏸' : '▶'}</button>
+      <div class="tname"><b>${esc(f.name)}</b><small><span class="badge-rec">ÎNREGISTRARE</span></small></div>
+      <button class="chip set-onair ${onairOn ? 'on' : ''}" title="Redă această înregistrare la pasul ON AIR, în locul speakerilor live">On Air</button>
+      <button class="chip set-intro ${introOn ? 'on' : ''}" title="Setează ca piesă de deschidere">Intro</button>
+      <button class="chip set-outro ${outroOn ? 'on' : ''}" title="Setează ca piesă de încheiere">Outro</button>`;
+    li.querySelector('.preview').onclick = () => togglePreview(f);
+    li.querySelector('.set-onair').onclick = () => {
+      assign.onair = onairOn ? null : { type: 'local', file: f.file, name: f.name };
+      saveAssign(); renderAllLists();
+    };
+    li.querySelector('.set-intro').onclick = () => setAssignLocal('intro', f);
+    li.querySelector('.set-outro').onclick = () => setAssignLocal('outro', f);
+    ul.appendChild(li);
+  }
 }
+function setAssignLocal(slot, f) {
+  const on = assign[slot]?.type === 'local' && assign[slot].file === f.file;
+  assign[slot] = on ? null : { type: 'local', file: f.file, name: f.name };
+  saveAssign();
+  renderAllLists();
+}
+
+function togglePreview(f) {
+  if (previewingFile === f.file) {
+    previewer.pause(); previewer.src = '';
+    previewingFile = null; renderLib(); updateNow(); return;
+  }
+  previewer.src = encodeURI(f.file);
+  previewer.volume = 0;
+  previewer.play();
+  fade(previewer, masterVol, 1200);
+  previewingFile = f.file;
+  previewer.onended = () => { previewingFile = null; renderLib(); updateNow(); };
+  renderLib(); updateNow('Preview: ' + f.name);
+}
+function stopPreview() {
+  if (previewingFile) { previewer.pause(); previewer.src = ''; previewingFile = null; renderLib(); }
+}
+
+/* ───────────────────────── Fluxul emisiei ───────────────────────── */
+const flowbtn = $('flowbtn');
+const stepEls = { intro: $('step1'), jingle: $('step2'), onair: $('step3'), outro: $('step4') };
+const order = ['intro', 'jingle', 'onair', 'outro'];
 
 function assignedLabel(slot) {
   const a = assign[slot];
   if (!a) return null;
-  if (a.type === 'local') return trackById(a.id)?.name ?? null;
+  if (a.type === 'local') return a.name;
   if (a.type === 'yt') return a.name + '  · YouTube';
   return a.name + '  · Spotify';
 }
@@ -886,67 +921,9 @@ function renderAssign() {
     el.textContent = label ?? 'nicio piesă aleasă';
     el.classList.toggle('missing', !label);
   }
+  $('onair-name').textContent = assign.onair ? '🎙 ' + assign.onair.name : 'speakerii live';
   updateFlowBtn();
 }
-
-async function removeTrack(t) {
-  if (!confirm(`Ștergi „${t.name}" din bibliotecă?`)) return;
-  await dbDelete(t.id);
-  tracks = tracks.filter(x => x.id !== t.id);
-  for (const slot of ['intro', 'outro'])
-    if (assign[slot]?.type === 'local' && assign[slot].id === t.id) assign[slot] = null;
-  localStorage.setItem('buletin.assign', JSON.stringify(assign));
-  renderList(); renderAssign();
-}
-
-function togglePreview(t) {
-  if (previewingId === t.id) {
-    previewer.pause(); previewer.src = '';
-    previewingId = null; renderList(); updateNow(); return;
-  }
-  previewer.src = URL.createObjectURL(t.blob);
-  previewer.volume = masterVol;
-  previewer.play();
-  previewingId = t.id;
-  previewer.onended = () => { previewingId = null; renderList(); updateNow(); };
-  renderList(); updateNow('Preview: ' + t.name);
-}
-
-/* ── Upload ── */
-const drop = $('drop'), filein = $('filein');
-drop.onclick = () => filein.click();
-filein.onchange = () => { addFiles([...filein.files]); filein.value = ''; };
-['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
-['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
-drop.addEventListener('drop', e => addFiles([...e.dataTransfer.files]));
-window.addEventListener('dragover', e => e.preventDefault());
-window.addEventListener('drop', e => e.preventDefault());
-
-async function addFiles(files) {
-  const audio = files.filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name));
-  if (!audio.length) { toast('Alege fișiere audio (MP3, WAV…)'); return; }
-  for (const f of audio) {
-    const duration = await new Promise(res => {
-      const a = new Audio(URL.createObjectURL(f));
-      a.onloadedmetadata = () => { res(a.duration); URL.revokeObjectURL(a.src); };
-      a.onerror = () => res(NaN);
-    });
-    const track = {
-      id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
-      name: f.name.replace(/\.[^.]+$/, ''),
-      duration, blob: f, addedAt: Date.now()
-    };
-    await dbPut(track);
-    tracks.push(track);
-  }
-  renderList(); renderAssign();
-  toast(audio.length === 1 ? `„${audio[0].name.replace(/\.[^.]+$/, '')}" adăugată ✓` : `${audio.length} piese adăugate ✓`);
-}
-
-/* ───────────────────────── Fluxul emisiei ───────────────────────── */
-const flowbtn = $('flowbtn');
-const stepEls = { intro: $('step1'), jingle: $('step2'), onair: $('step3'), outro: $('step4') };
-const order = ['intro', 'jingle', 'onair', 'outro'];
 
 function updateFlowBtn() {
   const ready = assignedLabel('intro') && assignedLabel('outro');
@@ -976,25 +953,25 @@ function markSteps() {
     stepEls[s].classList.toggle('done', step !== 'idle' && i < idx);
   });
   if (step === 'idle') order.forEach(s => stepEls[s].classList.remove('active', 'done'));
-  document.getElementById('onair').classList.toggle('live', step === 'onair');
+  $('onair').classList.toggle('live', step === 'onair');
 }
 
-/* Pornește piesa asignată slotului (local sau Spotify). Întoarce false dacă nu se poate. */
+function playLocalFile(a, { loop }) {
+  music.src = encodeURI(a.file);
+  music.loop = loop;
+  music.volume = 0;
+  music.play();
+  fade(music, masterVol, 1800);
+  musicSrc = 'local';
+}
+
+/* Pornește piesa asignată slotului. Întoarce false dacă nu se poate. */
 async function playAssigned(slot, { loop }) {
   const a = assign[slot];
   stopPreview();
   if (a.type === 'local') {
-    const t = trackById(a.id);
-    if (!t) return false;
-    if (currentURL) URL.revokeObjectURL(currentURL);
-    currentURL = URL.createObjectURL(t.blob);
-    music.src = currentURL;
-    music.loop = loop;
-    music.volume = 0;
-    music.play();
-    fade(music, masterVol, 1800);
-    musicSrc = 'local';
-    updateNow((slot === 'intro' ? 'Deschidere: ' : 'Încheiere: ') + t.name);
+    playLocalFile(a, { loop });
+    updateNow((slot === 'intro' ? 'Deschidere: ' : 'Încheiere: ') + a.name);
     return true;
   }
   /* YouTube */
@@ -1006,7 +983,7 @@ async function playAssigned(slot, { loop }) {
     return true;
   }
   /* Spotify */
-  if (!SP.tokens) { toast('Conectează Spotify întâi (panoul din dreapta)'); return false; }
+  if (!SP.tokens) { toast('Conectează Spotify întâi (panoul din stânga)'); return false; }
   if (!SP.ready) { toast('Playerul Spotify încă pornește — încearcă în câteva secunde'); return false; }
   try {
     await spPlay(a.uri, { loop });
@@ -1020,10 +997,6 @@ async function fadeStopMusic(ms) {
   if (musicSrc === 'sp') { await spFade(0, ms); await spStop(); }
   else if (musicSrc === 'yt') { await ytFade(0, ms); try { ytPlayer.pauseVideo(); } catch {} ytHide(); }
   else { await fade(music, 0, ms); music.pause(); }
-}
-
-function stopPreview() {
-  if (previewingId) { previewer.pause(); previewer.src = ''; previewingId = null; renderList(); }
 }
 
 async function advance() {
@@ -1041,12 +1014,25 @@ async function advance() {
     jingle.onended = () => {
       if (step !== 'jingle') return;
       step = 'onair';
-      updateNow('🎙 ON AIR — microfonul e al speakerilor');
+      if (assign.onair) {
+        playLocalFile(assign.onair, { loop: false });
+        updateNow('🎙 ON AIR: ' + assign.onair.name);
+        music.onended = () => {
+          if (step !== 'onair') return;
+          musicSrc = null;
+          updateNow('🎙 ON AIR — înregistrarea s-a terminat');
+          toast('Înregistrarea s-a terminat — pornește încheierea 🎵');
+        };
+      } else {
+        updateNow('🎙 ON AIR — microfonul e al speakerilor');
+      }
       updateFlowBtn(); markSteps();
     };
     return;
   }
   else if (step === 'onair') {
+    if (musicSrc === 'local' && !music.paused) await fadeStopMusic(1200);
+    music.onended = null;
     if (!await playAssigned('outro', { loop: false })) return;
     step = 'outro';
     music.onended = () => { if (step === 'outro' && musicSrc === 'local') finish(); };
@@ -1072,7 +1058,7 @@ function finish() {
 function stopAll() {
   if (music._fadeTimer) clearInterval(music._fadeTimer);
   if (jingle._fadeTimer) clearInterval(jingle._fadeTimer);
-  music.pause(); jingle.pause(); jingle.currentTime = 0;
+  music.pause(); music.onended = null; jingle.pause(); jingle.currentTime = 0;
   spStop();
   clearInterval(ytFadeTimer); ytFadeTimer = null;
   try { ytPlayer?.stopVideo(); } catch {}
@@ -1115,11 +1101,11 @@ $('preview-jingle').onclick = () => {
   else { jingle.pause(); jingle.currentTime = 0; }
 };
 
-/* ── Progres & indicatori (local + Spotify) ── */
+/* ── Progres & indicatori (local + Spotify + YouTube) ── */
 function updateNow(text) {
   $('nowplaying').innerHTML = text ? `<b>${esc(text)}</b>` : 'Nimic în redare';
 }
-const lastDur = { intro: 0, outro: 0 };
+const lastDur = { intro: 0, outro: 0, onair: 0 };
 let seekingPre = null; // slotul pe care utilizatorul trage sliderul acum
 function paintSeek(el) {
   const p = el.value / 10;
@@ -1156,18 +1142,21 @@ function bindSeek(pre) {
     el.blur(); // ca Space să continue să treacă la pasul următor
   });
 }
-bindSeek('intro'); bindSeek('outro');
+bindSeek('intro'); bindSeek('outro'); bindSeek('onair');
+
 setInterval(async () => {
   const introActive = step === 'intro', outroActive = step === 'outro';
+  const onairRec = step === 'onair' && musicSrc === 'local';
   $('prog-intro-row').classList.toggle('show', introActive);
   $('prog-outro-row').classList.toggle('show', outroActive);
+  $('prog-onair-row').classList.toggle('show', onairRec);
   $('eq-jingle').classList.toggle('playing', !jingle.paused);
 
   if (musicSrc === 'local') {
     $('eq-intro').classList.toggle('playing', introActive && !music.paused);
     $('eq-outro').classList.toggle('playing', outroActive && !music.paused);
-    if ((introActive || outroActive) && music.duration)
-      setProgress(introActive ? 'intro' : 'outro', music.currentTime, music.duration);
+    if ((introActive || outroActive || onairRec) && music.duration)
+      setProgress(onairRec ? 'onair' : introActive ? 'intro' : 'outro', music.currentTime, music.duration);
   } else if (musicSrc === 'sp' && SP.player) {
     const st = await SP.player.getCurrentState().catch(() => null);
     const playing = st && !st.paused;
@@ -1218,9 +1207,6 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') stopAll();
 });
 
-/* ── Căutare locală ── */
-searchEl.oninput = renderList;
-
 /* ── Init ── */
 (async function init() {
   /* întoarcere din autorizarea Spotify */
@@ -1242,14 +1228,9 @@ searchEl.oninput = renderList;
   if (SP.tokens) spLoadSDK();
   ytLoadAPI();
   renderYtList();
-
-  try {
-    await openDB();
-    tracks = await dbAll();
-  } catch {
-    emptyEl.textContent = 'Browserul nu permite salvarea locală aici — deschide site-ul printr-un server local sau găzduiește-l (ex. GitHub Pages).';
-  }
-  renderList(); renderAssign(); updateFlowBtn(); markSteps();
+  renderAssign();
+  updateFlowBtn(); markSteps();
+  libLoad();
 })();
 </script>
 </body>
