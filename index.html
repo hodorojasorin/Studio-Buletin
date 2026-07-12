@@ -445,6 +445,7 @@
   <div id="nowplaying">Nimic în redare</div>
   <button class="tbtn" id="fadebtn" title="Fade out lent (F)">Fade out</button>
   <button class="tbtn stop" id="stopbtn" title="Oprește tot (Esc)">■ Stop tot</button>
+  <button class="tbtn" id="fsbtn" title="Ecran complet">⛶ Full screen</button>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -1127,6 +1128,13 @@ async function fadeOutCurrent() {
 flowbtn.onclick = advance;
 $('stopbtn').onclick = stopAll;
 $('fadebtn').onclick = fadeOutCurrent;
+$('fsbtn').onclick = () => {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else document.documentElement.requestFullscreen();
+};
+document.addEventListener('fullscreenchange', () => {
+  $('fsbtn').textContent = document.fullscreenElement ? '⛶ Ieși din full screen' : '⛶ Full screen';
+});
 $('preview-jingle').onclick = () => {
   if (jingle.paused) { jingle.currentTime = 0; jingle.volume = masterVol; jingle.play(); }
   else { jingle.pause(); jingle.currentTime = 0; }
