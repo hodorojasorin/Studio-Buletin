@@ -808,7 +808,7 @@ function renderSpResults(items) {
       if (!SP.ready) { toast('Playerul Spotify nu e gata încă'); return; }
       stopPreview();
       spPlay(t.uri, { loop: false });
-      updateNow('Test: ' + t.name);
+      updateNow(t.name);
       musicSrc = 'sp';
     };
     li.querySelector('.set-intro').onclick = () => setAssignSp('intro', t);
@@ -928,7 +928,7 @@ function renderYtList() {
       stopPreview();
       ytPlay(v.id, { loop: false });
       musicSrc = 'yt';
-      updateNow('Test: ' + v.name);
+      updateNow(v.name);
     };
     li.querySelector('.set-intro').onclick = () => setAssignYt('intro', v);
     li.querySelector('.set-outro').onclick = () => setAssignYt('outro', v);
@@ -1042,7 +1042,7 @@ function togglePreview(f) {
   fade(previewer, masterVol, 1200);
   previewingFile = f.file;
   previewer.onended = () => { previewingFile = null; renderLib(); updateNow(); };
-  renderLib(); updateNow('Preview: ' + f.name);
+  renderLib(); updateNow(f.name);
 }
 function stopPreview() {
   if (previewingFile) { previewer.pause(); previewer.src = ''; previewingFile = null; renderLib(); }
@@ -1210,7 +1210,7 @@ async function playAssigned(slot, { loop }) {
   stopPreview();
   if (a.type === 'local') {
     playLocalFile(a, { loop });
-    updateNow((slot === 'intro' ? 'Deschidere: ' : 'Încheiere: ') + a.name);
+    updateNow(a.name);
     return true;
   }
   /* YouTube */
@@ -1218,7 +1218,7 @@ async function playAssigned(slot, { loop }) {
     if (!ytReady) { toast('Playerul YouTube încă pornește — încearcă în câteva secunde'); return false; }
     ytPlay(a.id, { loop });
     musicSrc = 'yt';
-    updateNow((slot === 'intro' ? 'Deschidere: ' : 'Încheiere: ') + a.name + ' · YouTube');
+    updateNow(a.name);
     return true;
   }
   /* Spotify */
@@ -1228,7 +1228,7 @@ async function playAssigned(slot, { loop }) {
     await spPlay(a.uri, { loop });
   } catch { toast('Spotify n-a pornit redarea — verifică Premium/conexiunea'); return false; }
   musicSrc = 'sp';
-  updateNow((slot === 'intro' ? 'Deschidere: ' : 'Încheiere: ') + a.name + ' · Spotify');
+  updateNow(a.name);
   return true;
 }
 
@@ -1249,7 +1249,7 @@ async function advance() {
     jingle.currentTime = 0;
     jingle.volume = masterVol;
     jingle.play();
-    updateNow('🔔 Jingle Buletin');
+    updateNow('Jingle Buletin');
     jingle.onended = () => {
       if (step !== 'jingle') return;
       step = 'onair';
