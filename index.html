@@ -58,12 +58,6 @@
   #onair.live { opacity: 1; animation: pulse 1.4s ease-in-out infinite; }
   #onair.playing { opacity: 1; background: var(--teal); letter-spacing: .5px; font-size: 15px; pointer-events: auto; }
   #onair.playing .dot { display: none; }
-  .strip-seek {
-    display: none; align-items: center; gap: 8px; margin-left: 16px;
-    font: 600 11.5px 'IBM Plex Mono', monospace; letter-spacing: 0; font-variant-numeric: tabular-nums;
-  }
-  #onair.playing .strip-seek { display: flex; }
-  .strip-seek .seek { width: 220px; flex: none; }
   #onair .dot { width: 12px; height: 12px; border-radius: 50%; background: #fff; animation: blink 1.4s ease-in-out infinite; }
   @keyframes pulse { 50% { background: #b8102f; } }
   @keyframes blink { 50% { opacity: .25; } }
@@ -368,11 +362,6 @@
 <div id="onair">
   <span class="dot"></span>
   <span id="onair-text">ON AIR — SPEAKERII VORBESC</span>
-  <span class="strip-seek">
-    <span id="prog-strip-cur">0:00</span>
-    <input type="range" class="seek" id="seek-strip" min="0" max="1000" value="0" title="Derulează prin piesă">
-    <span id="prog-strip-dur">0:00</span>
-  </span>
   <span class="dot"></span>
 </div>
 
@@ -1189,7 +1178,7 @@ function updateStrip() {
     $('onair-text').textContent = 'ON AIR — SPEAKERII VORBESC';
   } else if (nowPlayingText) {
     strip.className = 'playing';
-    $('onair-text').textContent = '♪ ' + nowPlayingText;
+    $('onair-text').textContent = nowPlayingText;
   } else {
     strip.className = '';
   }
@@ -1344,13 +1333,11 @@ function updateNow(text) {
   nowPlayingText = text || '';
   updateStrip();
 }
-const lastDur = { intro: 0, outro: 0, onair: 0, strip: 0 };
+const lastDur = { intro: 0, outro: 0, onair: 0 };
 let seekingPre = null; // slotul pe care utilizatorul trage sliderul acum
 function paintSeek(el) {
   const p = el.value / 10;
-  el.style.background = el.id === 'seek-strip'
-    ? `linear-gradient(90deg, #fff ${p}%, rgba(255,255,255,.32) ${p}%)`
-    : `linear-gradient(90deg, var(--teal) ${p}%, var(--navy-deep) ${p}%)`;
+  el.style.background = `linear-gradient(90deg, var(--teal) ${p}%, var(--navy-deep) ${p}%)`;
 }
 function setProgress(pre, cur, dur) {
   lastDur[pre] = dur || 0;
@@ -1385,7 +1372,7 @@ function bindSeek(pre) {
     el.blur(); // ca Space să continue să treacă la pasul următor
   });
 }
-bindSeek('intro'); bindSeek('outro'); bindSeek('onair'); bindSeek('strip');
+bindSeek('intro'); bindSeek('outro'); bindSeek('onair');
 
 setInterval(async () => {
   const introActive = step === 'intro', outroActive = step === 'outro';
@@ -1398,21 +1385,15 @@ setInterval(async () => {
   if (musicSrc === 'local') {
     $('eq-intro').classList.toggle('playing', introActive && !music.paused);
     $('eq-outro').classList.toggle('playing', outroActive && !music.paused);
-    if (music.duration) {
-      setProgress('strip', music.currentTime, music.duration);
-      if (introActive || outroActive || onairRec)
-        setProgress(onairRec ? 'onair' : introActive ? 'intro' : 'outro', music.currentTime, music.duration);
-    }
+    if ((introActive || outroActive || onairRec) && music.duration)
+      setProgress(onairRec ? 'onair' : introActive ? 'intro' : 'outro', music.currentTime, music.duration);
   } else if (musicSrc === 'sp' && SP.player) {
     const st = await SP.player.getCurrentState().catch(() => null);
     const playing = st && !st.paused;
     $('eq-intro').classList.toggle('playing', introActive && playing);
     $('eq-outro').classList.toggle('playing', outroActive && playing);
-    if (st) {
-      setProgress('strip', st.position / 1000, st.duration / 1000);
-      if (introActive || outroActive)
-        setProgress(introActive ? 'intro' : 'outro', st.position / 1000, st.duration / 1000);
-    }
+    if (st && (introActive || outroActive))
+      setProgress(introActive ? 'intro' : 'outro', st.position / 1000, st.duration / 1000);
     /* detectează sfârșitul piesei de încheiere pe Spotify */
     if (outroActive && st && st.paused && st.position === 0 && SP.lastPos > 2000) finish();
     if (st && !st.paused) SP.lastPos = st.position;
@@ -1420,14 +1401,11 @@ setInterval(async () => {
     const playing = ytPlayer.getPlayerState?.() === 1;
     $('eq-intro').classList.toggle('playing', introActive && playing);
     $('eq-outro').classList.toggle('playing', outroActive && playing);
-    setProgress('strip', ytPlayer.getCurrentTime?.() || 0, ytPlayer.getDuration?.() || 0);
     if (introActive || outroActive)
       setProgress(introActive ? 'intro' : 'outro', ytPlayer.getCurrentTime?.() || 0, ytPlayer.getDuration?.() || 0);
   } else {
     $('eq-intro').classList.remove('playing');
     $('eq-outro').classList.remove('playing');
-    if (previewingFile && previewer.duration)
-      setProgress('strip', previewer.currentTime, previewer.duration);
   }
 }, 400);
 
