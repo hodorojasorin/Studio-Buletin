@@ -308,14 +308,15 @@
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
     background: rgba(255,255,255,.92); backdrop-filter: blur(10px);
     border-top: 1px solid var(--navy-line);
-    display: flex; align-items: center; gap: 22px;
+    display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 22px;
     padding: 14px 28px;
   }
-  .transport .vol { display: flex; align-items: center; gap: 10px; flex: 1; max-width: 340px; font-size: 12px; color: var(--ink-dim); }
+  .transport .vol { display: flex; align-items: center; gap: 10px; width: 300px; max-width: 100%; justify-self: start; font-size: 12px; color: var(--ink-dim); }
   .meter {
-    flex: 1; display: flex; gap: 3px; align-items: center;
-    height: 14px; max-width: 620px; margin: 0 22px;
+    display: flex; gap: 3px; align-items: center; justify-self: center;
+    height: 14px; width: min(560px, 38vw);
   }
+  .tbtns { display: flex; gap: 10px; justify-self: end; }
   .meter i {
     flex: 1; height: 100%; border-radius: 2px;
     background: var(--navy-deep); border: 1px solid var(--navy-line);
@@ -522,12 +523,14 @@
     <span id="volpct" style="min-width:38px">90%</span>
   </div>
   <div class="meter" id="meter" title="Nivel audio"></div>
-  <button class="tbtn stop" id="stopbtn" title="Oprește tot (Esc)">
-    <svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></svg>
-  </button>
-  <button class="tbtn" id="fsbtn" title="Ecran complet (F)">
-    <svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
-  </button>
+  <div class="tbtns">
+    <button class="tbtn stop" id="stopbtn" title="Oprește tot (Esc)">
+      <svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></svg>
+    </button>
+    <button class="tbtn" id="fsbtn" title="Ecran complet (F)">
+      <svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3"/><path d="M21 8V5a2 2 0 0 0-2-2h-3"/><path d="M3 16v3a2 2 0 0 0 2 2h3"/><path d="M16 21h3a2 2 0 0 0 2-2v-3"/></svg>
+    </button>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
