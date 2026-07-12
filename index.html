@@ -1,0 +1,1087 @@
+<!doctype html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CEITI — Studio Buletin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@700;900&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1a293a;
+    --navy-deep: #131f2c;
+    --navy-card: #22354a;
+    --navy-line: #31465e;
+    --red: #df163c;
+    --teal: #20a4a2;
+    --ink: #eaf1f7;
+    --ink-dim: #8aa0b5;
+    --radius: 14px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Open Sans', system-ui, sans-serif;
+    background: radial-gradient(1200px 700px at 75% -10%, #24374c 0%, var(--navy) 45%, var(--navy-deep) 100%);
+    color: var(--ink);
+    min-height: 100vh;
+  }
+  h1, h2, h3, .slab { font-family: 'Roboto Slab', serif; }
+
+  /* ── Header ─────────────────────────────── */
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 28px; gap: 16px;
+    border-bottom: 1px solid var(--navy-line);
+    background: rgba(19,31,44,.55); backdrop-filter: blur(6px);
+    position: sticky; top: 0; z-index: 50;
+  }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .brand-mark {
+    width: 44px; height: 44px; border-radius: 12px;
+    background: var(--red);
+    display: grid; place-items: center;
+    font-family: 'Roboto Slab', serif; font-weight: 900; font-size: 20px; color: #fff;
+    box-shadow: 0 4px 18px rgba(223,22,60,.35);
+  }
+  .brand h1 { font-size: 20px; font-weight: 900; letter-spacing: .5px; line-height: 1.1; }
+  .brand h1 span { color: var(--teal); }
+  .brand p { font-size: 11px; color: var(--ink-dim); text-transform: uppercase; letter-spacing: 2px; }
+  .clockbox { text-align: right; }
+  #clock { font-family: 'Roboto Slab', serif; font-weight: 700; font-size: 26px; font-variant-numeric: tabular-nums; }
+  #dateline { font-size: 12px; color: var(--ink-dim); text-transform: capitalize; }
+
+  /* ── ON AIR banner ──────────────────────── */
+  #onair {
+    display: none; align-items: center; justify-content: center; gap: 12px;
+    background: var(--red); color: #fff;
+    font-family: 'Roboto Slab', serif; font-weight: 900; font-size: 18px; letter-spacing: 6px;
+    padding: 10px; text-align: center;
+  }
+  #onair.live { display: flex; animation: pulse 1.4s ease-in-out infinite; }
+  #onair .dot { width: 12px; height: 12px; border-radius: 50%; background: #fff; animation: blink 1.4s ease-in-out infinite; }
+  @keyframes pulse { 50% { background: #b8102f; } }
+  @keyframes blink { 50% { opacity: .25; } }
+
+  /* ── Layout ─────────────────────────────── */
+  main {
+    display: grid; grid-template-columns: 1.25fr .95fr; gap: 22px;
+    max-width: 1240px; margin: 0 auto; padding: 26px 28px 120px;
+  }
+  @media (max-width: 940px) { main { grid-template-columns: 1fr; } }
+
+  .panel-title {
+    font-size: 13px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase;
+    color: var(--ink-dim); margin: 22px 0 14px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .panel-title:first-child { margin-top: 0; }
+  .panel-title::after { content: ""; flex: 1; height: 1px; background: var(--navy-line); }
+
+  /* ── Flow steps ─────────────────────────── */
+  .step {
+    background: var(--navy-card);
+    border: 1px solid var(--navy-line);
+    border-radius: var(--radius);
+    padding: 16px 18px; margin-bottom: 14px;
+    display: grid; grid-template-columns: 46px 1fr auto; gap: 14px; align-items: center;
+    transition: border-color .3s, box-shadow .3s, opacity .3s;
+    opacity: .62;
+  }
+  .step.active { opacity: 1; border-color: var(--teal); box-shadow: 0 0 0 1px var(--teal), 0 8px 30px rgba(32,164,162,.18); }
+  .step.done { opacity: .85; }
+  .step.done .step-num { background: var(--teal); color: #fff; }
+  .step-num {
+    width: 46px; height: 46px; border-radius: 12px;
+    background: var(--navy-deep); border: 1px solid var(--navy-line);
+    display: grid; place-items: center;
+    font-family: 'Roboto Slab', serif; font-weight: 900; font-size: 19px;
+  }
+  .step.active .step-num { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .step-body h3 { font-size: 16px; font-weight: 700; letter-spacing: .3px; }
+  .step-body .desc { font-size: 12.5px; color: var(--ink-dim); margin-top: 2px; }
+  .step-body .track-name { color: var(--teal); font-weight: 600; }
+  .step-body .track-name.missing { color: var(--red); font-weight: 600; }
+
+  .eq { display: none; gap: 3px; align-items: flex-end; height: 18px; }
+  .eq.playing { display: inline-flex; }
+  .eq i { width: 4px; background: var(--teal); border-radius: 2px; animation: eq .9s ease-in-out infinite; }
+  .eq i:nth-child(1){ height: 60%; animation-delay: 0s }
+  .eq i:nth-child(2){ height: 100%; animation-delay: .25s }
+  .eq i:nth-child(3){ height: 40%; animation-delay: .5s }
+  .eq i:nth-child(4){ height: 80%; animation-delay: .12s }
+  @keyframes eq { 50% { transform: scaleY(.35); } }
+
+  .switch { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-dim); cursor: pointer; user-select: none; }
+  .switch input { display: none; }
+  .switch .rail { width: 36px; height: 20px; border-radius: 20px; background: var(--navy-deep); border: 1px solid var(--navy-line); position: relative; transition: background .2s; }
+  .switch .rail::after { content: ""; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: var(--ink-dim); transition: all .2s; }
+  .switch input:checked + .rail { background: var(--teal); border-color: var(--teal); }
+  .switch input:checked + .rail::after { left: 18px; background: #fff; }
+
+  .progress-row { grid-column: 1 / -1; display: none; align-items: center; gap: 10px; font-size: 11.5px; color: var(--ink-dim); font-variant-numeric: tabular-nums; }
+  .progress-row.show { display: flex; }
+  .seek {
+    -webkit-appearance: none; flex: 1; height: 6px; border-radius: 6px;
+    background: var(--navy-deep); outline: none; cursor: pointer;
+  }
+  .seek::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 15px; height: 15px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--teal); cursor: grab;
+    transition: transform .12s;
+  }
+  .seek::-webkit-slider-thumb:hover { transform: scale(1.2); }
+  .seek::-webkit-slider-thumb:active { cursor: grabbing; }
+  .seek::-moz-range-thumb {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: #fff; border: 3px solid var(--teal); cursor: grab;
+  }
+
+  /* ── Big action button ──────────────────── */
+  .bigbtn {
+    width: 100%; margin-top: 8px;
+    font-family: 'Roboto Slab', serif; font-weight: 900; font-size: 21px; letter-spacing: 1.5px;
+    padding: 20px; border: none; border-radius: var(--radius); cursor: pointer;
+    background: var(--red); color: #fff;
+    box-shadow: 0 8px 30px rgba(223,22,60,.35);
+    transition: transform .12s, filter .2s, background .3s;
+  }
+  .bigbtn:hover:not(:disabled) { filter: brightness(1.12); transform: translateY(-1px); }
+  .bigbtn:active:not(:disabled) { transform: translateY(1px); }
+  .bigbtn:disabled { background: var(--navy-line); box-shadow: none; cursor: not-allowed; color: var(--ink-dim); }
+  .bigbtn.teal { background: var(--teal); box-shadow: 0 8px 30px rgba(32,164,162,.35); }
+  .hint { text-align: center; font-size: 12px; color: var(--ink-dim); margin-top: 10px; }
+  .hint kbd {
+    font-family: inherit; background: var(--navy-deep); border: 1px solid var(--navy-line);
+    border-radius: 5px; padding: 1px 7px; font-size: 11px;
+  }
+
+  /* ── Spotify ────────────────────────────── */
+  .sp-card {
+    background: var(--navy-card); border: 1px solid var(--navy-line);
+    border-radius: var(--radius); padding: 14px; margin-bottom: 6px;
+  }
+  .sp-row { display: flex; align-items: center; gap: 12px; }
+  .sp-logo {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    background: #1DB954; color: #fff; display: grid; place-items: center; font-size: 19px;
+  }
+  .sp-info { flex: 1; min-width: 0; }
+  .sp-info b { display: block; font-size: 14px; }
+  .sp-info small { color: var(--ink-dim); font-size: 11.5px; }
+  .sp-info small.ok { color: var(--teal); font-weight: 600; }
+  .sp-btn {
+    font: 700 12px 'Open Sans', sans-serif; letter-spacing: .5px;
+    padding: 9px 16px; border-radius: 9px; border: none; cursor: pointer;
+    background: var(--teal); color: #fff; transition: filter .15s;
+  }
+  .sp-btn:hover { filter: brightness(1.12); }
+  .sp-btn.ghost { background: var(--navy-deep); border: 1px solid var(--navy-line); color: var(--ink-dim); }
+  .sp-btn.ghost:hover { color: var(--ink); filter: none; border-color: var(--ink-dim); }
+  #sp-setup { margin-top: 14px; border-top: 1px solid var(--navy-line); padding-top: 14px; font-size: 12.5px; color: var(--ink-dim); }
+  #sp-setup ol { margin: 8px 0 12px 18px; display: flex; flex-direction: column; gap: 5px; }
+  #sp-setup a { color: var(--teal); }
+  #sp-setup code {
+    background: var(--navy-deep); border: 1px solid var(--navy-line); border-radius: 5px;
+    padding: 1px 6px; font-size: 11.5px; color: var(--ink); user-select: all;
+  }
+  #sp-setup .search { margin: 0 0 10px; }
+  #sp-search { margin-top: 12px; margin-bottom: 10px; display: none; }
+  #sp-search.show { display: block; }
+  #sp-results { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 34vh; overflow-y: auto; padding-right: 4px; }
+  #sp-results::-webkit-scrollbar { width: 8px; }
+  #sp-results::-webkit-scrollbar-thumb { background: var(--navy-line); border-radius: 8px; }
+  .badge-sp {
+    display: inline-block; font-size: 9.5px; font-weight: 700; letter-spacing: 1px;
+    background: #1DB954; color: #fff; border-radius: 4px; padding: 1px 5px; vertical-align: 1px;
+  }
+
+  /* ── Library ────────────────────────────── */
+  .drop {
+    border: 2px dashed var(--navy-line); border-radius: var(--radius);
+    padding: 22px; text-align: center; cursor: pointer;
+    color: var(--ink-dim); font-size: 13.5px;
+    transition: all .2s; margin-bottom: 14px;
+  }
+  .drop strong { color: var(--teal); font-weight: 700; }
+  .drop.over { border-color: var(--teal); background: rgba(32,164,162,.08); color: var(--ink); }
+  .search {
+    width: 100%; padding: 12px 16px; margin-bottom: 12px;
+    border-radius: 10px; border: 1px solid var(--navy-line);
+    background: var(--navy-deep); color: var(--ink);
+    font: 600 14px 'Open Sans', sans-serif; outline: none;
+    transition: border-color .2s;
+  }
+  .search:focus { border-color: var(--teal); }
+  .search::placeholder { color: var(--ink-dim); font-weight: 400; }
+  #tracklist { list-style: none; display: flex; flex-direction: column; gap: 8px; max-height: 40vh; overflow-y: auto; padding-right: 4px; }
+  #tracklist::-webkit-scrollbar { width: 8px; }
+  #tracklist::-webkit-scrollbar-thumb { background: var(--navy-line); border-radius: 8px; }
+  .track {
+    background: var(--navy-card); border: 1px solid var(--navy-line); border-radius: 10px;
+    padding: 10px 12px; display: flex; align-items: center; gap: 10px;
+  }
+  .track .tname { flex: 1; min-width: 0; }
+  .track .tname b { display: block; font-size: 13.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .track .tname small { color: var(--ink-dim); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .iconbtn {
+    background: var(--navy-deep); border: 1px solid var(--navy-line); color: var(--ink);
+    width: 32px; height: 32px; border-radius: 8px; cursor: pointer; font-size: 13px;
+    display: grid; place-items: center; transition: all .15s; flex-shrink: 0;
+  }
+  .iconbtn:hover { border-color: var(--teal); color: var(--teal); }
+  .iconbtn.danger:hover { border-color: var(--red); color: var(--red); }
+  .chip {
+    border: 1px solid var(--navy-line); background: var(--navy-deep); color: var(--ink-dim);
+    font: 700 10.5px 'Open Sans', sans-serif; letter-spacing: 1px; text-transform: uppercase;
+    padding: 7px 10px; border-radius: 8px; cursor: pointer; transition: all .15s; flex-shrink: 0;
+  }
+  .chip:hover { color: var(--ink); border-color: var(--ink-dim); }
+  .chip.set-intro.on, .chip.set-outro.on { background: var(--teal); border-color: var(--teal); color: #fff; }
+  .empty { text-align: center; color: var(--ink-dim); font-size: 13px; padding: 30px 10px; }
+
+  /* ── Bottom transport bar ───────────────── */
+  .transport {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 60;
+    background: rgba(19,31,44,.92); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--navy-line);
+    display: flex; align-items: center; gap: 22px;
+    padding: 14px 28px;
+  }
+  .transport .vol { display: flex; align-items: center; gap: 10px; flex: 1; max-width: 340px; font-size: 12px; color: var(--ink-dim); }
+  input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 6px; background: var(--navy-line); outline: none; }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--teal); cursor: pointer; border: 3px solid var(--navy-deep);
+  }
+  #nowplaying { flex: 1; text-align: center; font-size: 13px; color: var(--ink-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  #nowplaying b { color: var(--ink); font-weight: 600; }
+  .tbtn {
+    font: 700 12.5px 'Open Sans', sans-serif; letter-spacing: 1px; text-transform: uppercase;
+    padding: 11px 18px; border-radius: 10px; border: 1px solid var(--navy-line);
+    background: var(--navy-card); color: var(--ink); cursor: pointer; transition: all .15s;
+  }
+  .tbtn:hover { border-color: var(--teal); color: var(--teal); }
+  .tbtn.stop:hover { border-color: var(--red); color: var(--red); }
+
+  .toast {
+    position: fixed; bottom: 86px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--teal); color: #fff; font-weight: 600; font-size: 13.5px;
+    padding: 11px 22px; border-radius: 10px; opacity: 0; pointer-events: none;
+    transition: all .3s; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,.4);
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<div id="onair"><span class="dot"></span> ON AIR — SPEAKERII VORBESC <span class="dot"></span></div>
+
+<header>
+  <div class="brand">
+    <div class="brand-mark">C</div>
+    <div>
+      <h1>STUDIO <span>BULETIN</span></h1>
+      <p>CEITI · Echipa de Producție Multimedia</p>
+    </div>
+  </div>
+  <div class="clockbox">
+    <div id="clock">--:--:--</div>
+    <div id="dateline"></div>
+  </div>
+</header>
+
+<main>
+  <!-- ── FLUXUL EMISIEI ── -->
+  <section>
+    <div class="panel-title">Fluxul buletinului</div>
+
+    <div class="step" id="step1" data-step="intro">
+      <div class="step-num">1</div>
+      <div class="step-body">
+        <h3>Piesa de deschidere <span class="eq" id="eq-intro"><i></i><i></i><i></i><i></i></span></h3>
+        <div class="desc">Se aude pe holuri până sunt gata speakerii · <span class="track-name missing" id="intro-name">nicio piesă aleasă</span></div>
+      </div>
+      <label class="switch" title="Repetă piesa până treci la jingle">
+        <input type="checkbox" id="loop-intro" checked><span class="rail"></span> Loop
+      </label>
+      <div class="progress-row" id="prog-intro-row">
+        <span id="prog-intro-cur">0:00</span>
+        <input type="range" class="seek" id="seek-intro" min="0" max="1000" value="0" title="Derulează prin piesă">
+        <span id="prog-intro-dur">0:00</span>
+      </div>
+    </div>
+
+    <div class="step" id="step2" data-step="jingle">
+      <div class="step-num">2</div>
+      <div class="step-body">
+        <h3>Jingle Buletin <span class="eq" id="eq-jingle"><i></i><i></i><i></i><i></i></span></h3>
+        <div class="desc">Semnalul știut de elevi — în câteva secunde intră speakerii · <span class="track-name">integrat, 13 sec</span></div>
+      </div>
+      <button class="iconbtn" id="preview-jingle" title="Ascultă jingle-ul (test)">▶</button>
+    </div>
+
+    <div class="step" id="step3" data-step="onair">
+      <div class="step-num">3</div>
+      <div class="step-body">
+        <h3>ON AIR — buletinul informativ</h3>
+        <div class="desc">Liniște pe consolă, microfonul e al speakerilor</div>
+      </div>
+      <span style="font-size:22px">🎙</span>
+    </div>
+
+    <div class="step" id="step4" data-step="outro">
+      <div class="step-num">4</div>
+      <div class="step-body">
+        <h3>Piesa de încheiere <span class="eq" id="eq-outro"><i></i><i></i><i></i><i></i></span></h3>
+        <div class="desc">A doua piesă a zilei, după buletin · <span class="track-name missing" id="outro-name">nicio piesă aleasă</span></div>
+      </div>
+      <div></div>
+      <div class="progress-row" id="prog-outro-row">
+        <span id="prog-outro-cur">0:00</span>
+        <input type="range" class="seek" id="seek-outro" min="0" max="1000" value="0" title="Derulează prin piesă">
+        <span id="prog-outro-dur">0:00</span>
+      </div>
+    </div>
+
+    <button class="bigbtn" id="flowbtn" disabled>ALEGE PIESELE ZILEI →</button>
+    <div class="hint"><kbd>Space</kbd> pasul următor · <kbd>F</kbd> fade out · <kbd>Esc</kbd> stop tot</div>
+  </section>
+
+  <!-- ── SURSE MUZICĂ ── -->
+  <section>
+    <div class="panel-title">Spotify</div>
+
+    <div class="sp-card">
+      <div class="sp-row">
+        <div class="sp-logo">♫</div>
+        <div class="sp-info">
+          <b>Spotify Web Player</b>
+          <small id="sp-status">neconectat — necesită cont Premium</small>
+        </div>
+        <button class="sp-btn ghost" id="sp-setup-btn">⚙ Setări</button>
+        <button class="sp-btn" id="sp-connect">Conectează</button>
+      </div>
+
+      <div id="sp-setup" hidden>
+        Configurare unică (2 minute):
+        <ol>
+          <li>Intră pe <a href="https://developer.spotify.com/dashboard" target="_blank">developer.spotify.com/dashboard</a> și apasă <b>Create app</b>.</li>
+          <li>La <b>Redirect URI</b> pune exact: <code id="sp-redirect"></code></li>
+          <li>Bifează <b>Web API</b> + <b>Web Playback SDK</b>, salvează, apoi copiază <b>Client ID</b> aici:</li>
+        </ol>
+        <input class="search" id="sp-clientid" placeholder="Client ID din Spotify Dashboard">
+        <button class="sp-btn" id="sp-save">Salvează Client ID</button>
+      </div>
+
+      <input class="search" id="sp-search" type="search" placeholder="Caută pe Spotify… piesă, artist">
+      <ul id="sp-results"></ul>
+    </div>
+
+    <div class="panel-title">Biblioteca locală</div>
+
+    <div class="drop" id="drop">
+      <strong>Trage piesele aici</strong> sau apasă ca să le alegi<br>
+      <small>MP3 / WAV / M4A — rămân salvate în browser, fără niciun server</small>
+      <input type="file" id="filein" accept="audio/*,.mp3,.wav,.m4a,.aac,.ogg,.flac" multiple hidden>
+    </div>
+
+    <input class="search" id="search" type="search" placeholder="Caută în bibliotecă…">
+
+    <ul id="tracklist"></ul>
+    <div class="empty" id="empty">Biblioteca e goală — încarcă primele piese 🎵</div>
+  </section>
+</main>
+
+<div class="transport">
+  <div class="vol">
+    🔊
+    <input type="range" id="volume" min="0" max="100" value="90">
+    <span id="volpct" style="min-width:38px">90%</span>
+  </div>
+  <div id="nowplaying">Nimic în redare</div>
+  <button class="tbtn" id="fadebtn" title="Fade out lent (F)">Fade out</button>
+  <button class="tbtn stop" id="stopbtn" title="Oprește tot (Esc)">■ Stop tot</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<audio id="music"></audio>
+<audio id="jingle" src="jingle-buletin.mp3" preload="auto"></audio>
+<audio id="previewer"></audio>
+
+<script>
+/* ───────────────────────── Ceas & dată ───────────────────────── */
+const clock = document.getElementById('clock');
+const dateline = document.getElementById('dateline');
+function tick() {
+  const n = new Date();
+  clock.textContent = n.toLocaleTimeString('ro-RO');
+  dateline.textContent = n.toLocaleDateString('ro-RO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+tick(); setInterval(tick, 1000);
+
+/* ───────────────────────── IndexedDB ───────────────────────── */
+const DB_NAME = 'ceiti-buletin', STORE = 'tracks';
+let db;
+function openDB() {
+  return new Promise((res, rej) => {
+    const req = indexedDB.open(DB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(STORE, { keyPath: 'id' });
+    req.onsuccess = () => { db = req.result; res(); };
+    req.onerror = () => rej(req.error);
+  });
+}
+function dbPut(track) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).put(track);
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+  });
+}
+function dbAll() {
+  return new Promise((res, rej) => {
+    const req = db.transaction(STORE).objectStore(STORE).getAll();
+    req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error);
+  });
+}
+function dbDelete(id) {
+  return new Promise((res, rej) => {
+    const tx = db.transaction(STORE, 'readwrite');
+    tx.objectStore(STORE).delete(id);
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+  });
+}
+
+/* ───────────────────────── Stare ───────────────────────── */
+let tracks = [];
+/* assign.intro / assign.outro:
+   { type:'local', id }  sau  { type:'sp', uri, name, dur } */
+let assign = JSON.parse(localStorage.getItem('buletin.assign') || '{"intro":null,"outro":null}');
+for (const slot of ['intro', 'outro'])
+  if (typeof assign[slot] === 'string') assign[slot] = { type: 'local', id: assign[slot] };
+
+let masterVol = +(localStorage.getItem('buletin.vol') ?? 90) / 100;
+let step = 'idle'; // idle → intro → jingle → onair → outro
+let musicSrc = null; // 'local' | 'sp' — ce sursă redă pasul curent
+const music = document.getElementById('music');
+const jingle = document.getElementById('jingle');
+const previewer = document.getElementById('previewer');
+let previewingId = null;
+let currentURL = null;
+
+const $ = id => document.getElementById(id);
+const toastEl = $('toast');
+let toastTimer;
+function toast(msg) {
+  toastEl.textContent = msg;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toastEl.classList.remove('show'), 2800);
+}
+function fmt(s) {
+  if (!isFinite(s)) return '–:––';
+  s = Math.round(s);
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+}
+function esc(s) { return s.replace(/</g, '&lt;'); }
+
+/* ───────────────────────── Fade audio local ───────────────────────── */
+function fade(el, target, ms) {
+  return new Promise(res => {
+    if (el._fadeTimer) clearInterval(el._fadeTimer);
+    const from = el.volume, steps = Math.max(1, Math.round(ms / 40));
+    let i = 0;
+    el._fadeTimer = setInterval(() => {
+      i++;
+      el.volume = Math.min(1, Math.max(0, from + (target - from) * (i / steps)));
+      if (i >= steps) { clearInterval(el._fadeTimer); el._fadeTimer = null; res(); }
+    }, 40);
+  });
+}
+
+/* ───────────────────────── Spotify (Web Playback SDK + PKCE) ───────────────────────── */
+const SP = {
+  clientId: localStorage.getItem('sp.clientId') || '',
+  tokens: JSON.parse(localStorage.getItem('sp.tokens') || 'null'),
+  player: null, deviceId: null, ready: false, fadeTimer: null,
+  lastPos: 0, state: null,
+};
+const SP_REDIRECT = location.origin + location.pathname;
+const SP_SCOPES = 'streaming user-read-email user-read-private user-read-playback-state user-modify-playback-state';
+
+function b64url(buf) {
+  return btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+async function spLogin() {
+  if (!SP.clientId) { $('sp-setup').hidden = false; toast('Întâi salvează Client ID-ul (vezi Setări)'); return; }
+  const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
+  localStorage.setItem('sp.verifier', verifier);
+  const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
+  location.href = 'https://accounts.spotify.com/authorize?' + new URLSearchParams({
+    client_id: SP.clientId, response_type: 'code', redirect_uri: SP_REDIRECT,
+    scope: SP_SCOPES, code_challenge_method: 'S256', code_challenge: challenge
+  });
+}
+function spSaveTokens(j) {
+  SP.tokens = {
+    access: j.access_token,
+    refresh: j.refresh_token ?? SP.tokens?.refresh,
+    exp: Date.now() + (j.expires_in - 60) * 1000
+  };
+  localStorage.setItem('sp.tokens', JSON.stringify(SP.tokens));
+}
+async function spTokenCall(body) {
+  const r = await fetch('https://accounts.spotify.com/api/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams(body)
+  });
+  if (!r.ok) throw new Error('token ' + r.status);
+  spSaveTokens(await r.json());
+}
+async function spToken() {
+  if (!SP.tokens) return null;
+  if (Date.now() < SP.tokens.exp) return SP.tokens.access;
+  try {
+    await spTokenCall({ client_id: SP.clientId, grant_type: 'refresh_token', refresh_token: SP.tokens.refresh });
+    return SP.tokens.access;
+  } catch { spDisconnect(); return null; }
+}
+async function sApi(path, opts = {}) {
+  const t = await spToken();
+  if (!t) throw new Error('Spotify neconectat');
+  const r = await fetch('https://api.spotify.com/v1' + path, {
+    ...opts, headers: { ...(opts.headers || {}), Authorization: 'Bearer ' + t }
+  });
+  if (!r.ok && r.status !== 204) throw new Error('Spotify API ' + r.status);
+  const ct = r.headers.get('content-type') || '';
+  return ct.includes('json') ? r.json() : null;
+}
+function spDisconnect() {
+  localStorage.removeItem('sp.tokens');
+  SP.tokens = null; SP.ready = false; SP.deviceId = null;
+  try { SP.player?.disconnect(); } catch {}
+  SP.player = null;
+  spRenderStatus();
+}
+function spRenderStatus() {
+  const st = $('sp-status'), btn = $('sp-connect'), search = $('sp-search');
+  if (!SP.tokens) {
+    st.textContent = 'neconectat — necesită cont Premium'; st.className = '';
+    btn.textContent = 'Conectează';
+    search.classList.remove('show'); $('sp-results').innerHTML = '';
+  } else if (!SP.ready) {
+    st.textContent = 'conectat — pornesc playerul…'; st.className = '';
+    btn.textContent = 'Deconectează';
+    search.classList.add('show');
+  } else {
+    st.textContent = '● gata de emisie — caută și redă piese întregi'; st.className = 'ok';
+    btn.textContent = 'Deconectează';
+    search.classList.add('show');
+  }
+}
+function spLoadSDK() {
+  if (document.getElementById('spsdk')) { if (window.Spotify && !SP.player) spInitPlayer(); return; }
+  window.onSpotifyWebPlaybackSDKReady = spInitPlayer;
+  const s = document.createElement('script');
+  s.id = 'spsdk'; s.src = 'https://sdk.scdn.co/spotify-player.js';
+  document.body.appendChild(s);
+}
+function spInitPlayer() {
+  SP.player = new Spotify.Player({
+    name: 'CEITI Studio Buletin',
+    getOAuthToken: cb => spToken().then(t => t && cb(t)),
+    volume: masterVol
+  });
+  SP.player.addListener('ready', ({ device_id }) => { SP.deviceId = device_id; SP.ready = true; spRenderStatus(); });
+  SP.player.addListener('not_ready', () => { SP.ready = false; spRenderStatus(); });
+  SP.player.addListener('player_state_changed', st => { SP.state = st; });
+  SP.player.addListener('initialization_error', () => toast('Spotify: browserul nu suportă playerul (folosește Chrome)'));
+  SP.player.addListener('authentication_error', () => { spDisconnect(); toast('Spotify: sesiune expirată, reconectează-te'); });
+  SP.player.addListener('account_error', () => toast('Spotify Web Player necesită cont Premium'));
+  SP.player.connect();
+}
+function spFade(target, ms) {
+  return new Promise(async res => {
+    if (!SP.player) return res();
+    clearInterval(SP.fadeTimer);
+    const from = await SP.player.getVolume().catch(() => masterVol);
+    const steps = Math.max(1, Math.round(ms / 80));
+    let i = 0;
+    SP.fadeTimer = setInterval(() => {
+      i++;
+      SP.player.setVolume(Math.min(1, Math.max(0, from + (target - from) * (i / steps))));
+      if (i >= steps) { clearInterval(SP.fadeTimer); SP.fadeTimer = null; res(); }
+    }, 80);
+  });
+}
+async function spPlay(uri, { loop }) {
+  SP.player.activateElement?.();
+  SP.lastPos = 0;
+  await SP.player.setVolume(0);
+  await sApi(`/me/player/play?device_id=${SP.deviceId}`, {
+    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ uris: [uri] })
+  });
+  sApi(`/me/player/repeat?state=${loop ? 'track' : 'off'}&device_id=${SP.deviceId}`, { method: 'PUT' }).catch(() => {});
+  spFade(masterVol, 1800);
+}
+async function spStop() {
+  clearInterval(SP.fadeTimer); SP.fadeTimer = null;
+  try { await SP.player?.pause(); } catch {}
+}
+
+/* ── Spotify UI ── */
+$('sp-redirect').textContent = SP_REDIRECT;
+$('sp-clientid').value = SP.clientId;
+$('sp-setup-btn').onclick = () => { $('sp-setup').hidden = !$('sp-setup').hidden; };
+$('sp-save').onclick = () => {
+  SP.clientId = $('sp-clientid').value.trim();
+  localStorage.setItem('sp.clientId', SP.clientId);
+  $('sp-setup').hidden = true;
+  toast('Client ID salvat ✓ Acum apasă „Conectează"');
+};
+$('sp-connect').onclick = () => SP.tokens ? spDisconnect() : spLogin();
+
+let spSearchTimer;
+$('sp-search').oninput = () => {
+  clearTimeout(spSearchTimer);
+  const q = $('sp-search').value.trim();
+  if (!q) { $('sp-results').innerHTML = ''; return; }
+  spSearchTimer = setTimeout(async () => {
+    try {
+      const j = await sApi('/search?' + new URLSearchParams({ q, type: 'track', limit: 8 }));
+      renderSpResults(j.tracks.items);
+    } catch { toast('Căutarea Spotify a eșuat — verifică conexiunea'); }
+  }, 400);
+};
+function renderSpResults(items) {
+  const ul = $('sp-results');
+  ul.innerHTML = '';
+  for (const it of items) {
+    const t = { uri: it.uri, name: it.name + ' — ' + it.artists.map(a => a.name).join(', '), dur: it.duration_ms };
+    const li = document.createElement('li');
+    li.className = 'track';
+    li.innerHTML = `
+      <button class="iconbtn play" title="Redă acum (test)">▶</button>
+      <div class="tname"><b>${esc(t.name)}</b><small>${fmt(t.dur / 1000)} · <span class="badge-sp">SPOTIFY</span></small></div>
+      <button class="chip set-intro ${isAssigned('intro', t) ? 'on' : ''}">Intro</button>
+      <button class="chip set-outro ${isAssigned('outro', t) ? 'on' : ''}">Outro</button>`;
+    li.querySelector('.play').onclick = () => {
+      if (step !== 'idle') { toast('Emisia e în desfășurare — nu porni alt sunet'); return; }
+      if (!SP.ready) { toast('Playerul Spotify nu e gata încă'); return; }
+      spPlay(t.uri, { loop: false });
+      updateNow('Test: ' + t.name);
+      musicSrc = 'sp';
+    };
+    li.querySelector('.set-intro').onclick = () => setAssignSp('intro', t);
+    li.querySelector('.set-outro').onclick = () => setAssignSp('outro', t);
+    ul.appendChild(li);
+  }
+}
+function isAssigned(slot, spTrack) {
+  return assign[slot]?.type === 'sp' && assign[slot].uri === spTrack.uri;
+}
+function setAssignSp(slot, t) {
+  assign[slot] = isAssigned(slot, t) ? null : { type: 'sp', uri: t.uri, name: t.name, dur: t.dur };
+  localStorage.setItem('buletin.assign', JSON.stringify(assign));
+  refreshSpChips(); renderList(); renderAssign();
+}
+function refreshSpChips() {
+  for (const li of $('sp-results').children) {
+    /* re-render simplu: chips-urile se refac la următoarea căutare;
+       aici doar sincronizăm clasa 'on' după numele afișat */
+  }
+  const q = $('sp-search').value.trim();
+  if (q) $('sp-search').dispatchEvent(new Event('input'));
+}
+
+/* ───────────────────────── Bibliotecă locală ───────────────────────── */
+const listEl = $('tracklist'), emptyEl = $('empty'), searchEl = $('search');
+
+function trackById(id) { return tracks.find(t => t.id === id); }
+
+function renderList() {
+  const q = searchEl.value.trim().toLowerCase();
+  const shown = tracks
+    .filter(t => t.name.toLowerCase().includes(q))
+    .sort((a, b) => b.addedAt - a.addedAt);
+  listEl.innerHTML = '';
+  emptyEl.style.display = shown.length ? 'none' : 'block';
+  emptyEl.textContent = tracks.length && !shown.length
+    ? 'Nicio piesă nu se potrivește căutării 🔍'
+    : 'Biblioteca e goală — încarcă primele piese 🎵';
+  for (const t of shown) {
+    const li = document.createElement('li');
+    li.className = 'track';
+    const introOn = assign.intro?.type === 'local' && assign.intro.id === t.id;
+    const outroOn = assign.outro?.type === 'local' && assign.outro.id === t.id;
+    li.innerHTML = `
+      <button class="iconbtn preview" title="Ascultă">${previewingId === t.id ? '⏸' : '▶'}</button>
+      <div class="tname"><b>${esc(t.name)}</b><small>${fmt(t.duration)}</small></div>
+      <button class="chip set-intro ${introOn ? 'on' : ''}" title="Setează ca piesă de deschidere">Intro</button>
+      <button class="chip set-outro ${outroOn ? 'on' : ''}" title="Setează ca piesă de încheiere">Outro</button>
+      <button class="iconbtn danger del" title="Șterge din bibliotecă">✕</button>`;
+    li.querySelector('.preview').onclick = () => togglePreview(t);
+    li.querySelector('.set-intro').onclick = () => setAssign('intro', t);
+    li.querySelector('.set-outro').onclick = () => setAssign('outro', t);
+    li.querySelector('.del').onclick = () => removeTrack(t);
+    listEl.appendChild(li);
+  }
+}
+
+function setAssign(slot, t) {
+  const on = assign[slot]?.type === 'local' && assign[slot].id === t.id;
+  assign[slot] = on ? null : { type: 'local', id: t.id };
+  localStorage.setItem('buletin.assign', JSON.stringify(assign));
+  renderList(); renderAssign(); refreshSpChips();
+}
+
+function assignedLabel(slot) {
+  const a = assign[slot];
+  if (!a) return null;
+  if (a.type === 'local') return trackById(a.id)?.name ?? null;
+  return a.name + '  · Spotify';
+}
+
+function renderAssign() {
+  for (const slot of ['intro', 'outro']) {
+    const el = $(slot + '-name'), label = assignedLabel(slot);
+    el.textContent = label ?? 'nicio piesă aleasă';
+    el.classList.toggle('missing', !label);
+  }
+  updateFlowBtn();
+}
+
+async function removeTrack(t) {
+  if (!confirm(`Ștergi „${t.name}" din bibliotecă?`)) return;
+  await dbDelete(t.id);
+  tracks = tracks.filter(x => x.id !== t.id);
+  for (const slot of ['intro', 'outro'])
+    if (assign[slot]?.type === 'local' && assign[slot].id === t.id) assign[slot] = null;
+  localStorage.setItem('buletin.assign', JSON.stringify(assign));
+  renderList(); renderAssign();
+}
+
+function togglePreview(t) {
+  if (previewingId === t.id) {
+    previewer.pause(); previewer.src = '';
+    previewingId = null; renderList(); updateNow(); return;
+  }
+  previewer.src = URL.createObjectURL(t.blob);
+  previewer.volume = masterVol;
+  previewer.play();
+  previewingId = t.id;
+  previewer.onended = () => { previewingId = null; renderList(); updateNow(); };
+  renderList(); updateNow('Preview: ' + t.name);
+}
+
+/* ── Upload ── */
+const drop = $('drop'), filein = $('filein');
+drop.onclick = () => filein.click();
+filein.onchange = () => { addFiles([...filein.files]); filein.value = ''; };
+['dragenter','dragover'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave','drop'].forEach(ev => drop.addEventListener(ev, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => addFiles([...e.dataTransfer.files]));
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => e.preventDefault());
+
+async function addFiles(files) {
+  const audio = files.filter(f => f.type.startsWith('audio/') || /\.(mp3|wav|m4a|aac|ogg|flac)$/i.test(f.name));
+  if (!audio.length) { toast('Alege fișiere audio (MP3, WAV…)'); return; }
+  for (const f of audio) {
+    const duration = await new Promise(res => {
+      const a = new Audio(URL.createObjectURL(f));
+      a.onloadedmetadata = () => { res(a.duration); URL.revokeObjectURL(a.src); };
+      a.onerror = () => res(NaN);
+    });
+    const track = {
+      id: Date.now() + '-' + Math.random().toString(36).slice(2, 8),
+      name: f.name.replace(/\.[^.]+$/, ''),
+      duration, blob: f, addedAt: Date.now()
+    };
+    await dbPut(track);
+    tracks.push(track);
+  }
+  renderList(); renderAssign();
+  toast(audio.length === 1 ? `„${audio[0].name.replace(/\.[^.]+$/, '')}" adăugată ✓` : `${audio.length} piese adăugate ✓`);
+}
+
+/* ───────────────────────── Fluxul emisiei ───────────────────────── */
+const flowbtn = $('flowbtn');
+const stepEls = { intro: $('step1'), jingle: $('step2'), onair: $('step3'), outro: $('step4') };
+const order = ['intro', 'jingle', 'onair', 'outro'];
+
+function updateFlowBtn() {
+  const ready = assignedLabel('intro') && assignedLabel('outro');
+  if (step === 'idle') {
+    flowbtn.disabled = !ready;
+    flowbtn.className = 'bigbtn';
+    flowbtn.textContent = ready ? '▶ PORNEȘTE PIESA DE DESCHIDERE' : 'ALEGE PIESELE ZILEI →';
+  } else if (step === 'intro') {
+    flowbtn.disabled = false; flowbtn.className = 'bigbtn';
+    flowbtn.textContent = '⏭ FADE + JINGLE BULETIN';
+  } else if (step === 'jingle') {
+    flowbtn.disabled = true; flowbtn.className = 'bigbtn';
+    flowbtn.textContent = '… JINGLE ÎN REDARE …';
+  } else if (step === 'onair') {
+    flowbtn.disabled = false; flowbtn.className = 'bigbtn teal';
+    flowbtn.textContent = '🎵 BULETIN GATA — PORNEȘTE ÎNCHEIEREA';
+  } else if (step === 'outro') {
+    flowbtn.disabled = false; flowbtn.className = 'bigbtn';
+    flowbtn.textContent = '⏹ FADE OUT FINAL';
+  }
+}
+
+function markSteps() {
+  const idx = order.indexOf(step);
+  order.forEach((s, i) => {
+    stepEls[s].classList.toggle('active', s === step);
+    stepEls[s].classList.toggle('done', step !== 'idle' && i < idx);
+  });
+  if (step === 'idle') order.forEach(s => stepEls[s].classList.remove('active', 'done'));
+  document.getElementById('onair').classList.toggle('live', step === 'onair');
+}
+
+/* Pornește piesa asignată slotului (local sau Spotify). Întoarce false dacă nu se poate. */
+async function playAssigned(slot, { loop }) {
+  const a = assign[slot];
+  stopPreview();
+  if (a.type === 'local') {
+    const t = trackById(a.id);
+    if (!t) return false;
+    if (currentURL) URL.revokeObjectURL(currentURL);
+    currentURL = URL.createObjectURL(t.blob);
+    music.src = currentURL;
+    music.loop = loop;
+    music.volume = 0;
+    music.play();
+    fade(music, masterVol, 1800);
+    musicSrc = 'local';
+    updateNow((slot === 'intro' ? 'Deschidere: ' : 'Încheiere: ') + t.name);
+    return true;
+  }
+  /* Spotify */
+  if (!SP.tokens) { toast('Conectează Spotify întâi (panoul din dreapta)'); return false; }
+  if (!SP.ready) { toast('Playerul Spotify încă pornește — încearcă în câteva secunde'); return false; }
+  try {
+    await spPlay(a.uri, { loop });
+  } catch { toast('Spotify n-a pornit redarea — verifică Premium/conexiunea'); return false; }
+  musicSrc = 'sp';
+  updateNow((slot === 'intro' ? 'Deschidere: ' : 'Încheiere: ') + a.name + ' · Spotify');
+  return true;
+}
+
+async function fadeStopMusic(ms) {
+  if (musicSrc === 'sp') { await spFade(0, ms); await spStop(); }
+  else { await fade(music, 0, ms); music.pause(); }
+}
+
+function stopPreview() {
+  if (previewingId) { previewer.pause(); previewer.src = ''; previewingId = null; renderList(); }
+}
+
+async function advance() {
+  if (step === 'idle') {
+    if (!await playAssigned('intro', { loop: $('loop-intro').checked })) return;
+    step = 'intro';
+  }
+  else if (step === 'intro') {
+    step = 'jingle'; updateFlowBtn(); markSteps();
+    await fadeStopMusic(2200);
+    jingle.currentTime = 0;
+    jingle.volume = masterVol;
+    jingle.play();
+    updateNow('🔔 Jingle Buletin');
+    jingle.onended = () => {
+      if (step !== 'jingle') return;
+      step = 'onair';
+      updateNow('🎙 ON AIR — microfonul e al speakerilor');
+      updateFlowBtn(); markSteps();
+    };
+    return;
+  }
+  else if (step === 'onair') {
+    if (!await playAssigned('outro', { loop: false })) return;
+    step = 'outro';
+    music.onended = () => { if (step === 'outro' && musicSrc === 'local') finish(); };
+  }
+  else if (step === 'outro') {
+    await fadeStopMusic(3000);
+    finish();
+    return;
+  }
+  updateFlowBtn(); markSteps();
+}
+
+function finish() {
+  step = 'idle';
+  musicSrc = null;
+  music.onended = null;
+  updateNow();
+  updateFlowBtn(); markSteps();
+  toast('Buletin încheiat — pe mâine! 🎬');
+}
+
+function stopAll() {
+  if (music._fadeTimer) clearInterval(music._fadeTimer);
+  if (jingle._fadeTimer) clearInterval(jingle._fadeTimer);
+  music.pause(); jingle.pause(); jingle.currentTime = 0;
+  spStop();
+  stopPreview();
+  step = 'idle'; musicSrc = null;
+  updateNow(); updateFlowBtn(); markSteps();
+}
+
+async function fadeOutCurrent() {
+  const jobs = [];
+  const localActive = [music, jingle, previewer].filter(a => !a.paused);
+  if (localActive.length) jobs.push(Promise.all(localActive.map(a => fade(a, 0, 2500))).then(() => localActive.forEach(a => a.pause())));
+  if (musicSrc === 'sp') jobs.push(spFade(0, 2500).then(spStop));
+  if (!jobs.length) return;
+  await Promise.all(jobs);
+  if (step === 'outro') finish();
+  else if (step === 'intro' || step === 'jingle') {
+    step = step === 'intro' ? 'idle' : 'onair';
+    musicSrc = null;
+    updateNow(); updateFlowBtn(); markSteps();
+  } else { musicSrc = null; updateNow(); }
+  stopPreview();
+}
+
+flowbtn.onclick = advance;
+$('stopbtn').onclick = stopAll;
+$('fadebtn').onclick = fadeOutCurrent;
+$('preview-jingle').onclick = () => {
+  if (jingle.paused) { jingle.currentTime = 0; jingle.volume = masterVol; jingle.play(); }
+  else { jingle.pause(); jingle.currentTime = 0; }
+};
+
+/* ── Progres & indicatori (local + Spotify) ── */
+function updateNow(text) {
+  $('nowplaying').innerHTML = text ? `<b>${esc(text)}</b>` : 'Nimic în redare';
+}
+const lastDur = { intro: 0, outro: 0 };
+let seekingPre = null; // slotul pe care utilizatorul trage sliderul acum
+function paintSeek(el) {
+  const p = el.value / 10;
+  el.style.background = `linear-gradient(90deg, var(--teal) ${p}%, var(--navy-deep) ${p}%)`;
+}
+function setProgress(pre, cur, dur) {
+  lastDur[pre] = dur || 0;
+  $(`prog-${pre}-dur`).textContent = fmt(dur);
+  const el = $(`seek-${pre}`);
+  if (seekingPre !== pre) {
+    $(`prog-${pre}-cur`).textContent = fmt(cur);
+    el.value = dur ? Math.round(cur / dur * 1000) : 0;
+    paintSeek(el);
+  }
+}
+function bindSeek(pre) {
+  const el = $(`seek-${pre}`);
+  el.addEventListener('input', () => {
+    seekingPre = pre;
+    $(`prog-${pre}-cur`).textContent = fmt(el.value / 1000 * lastDur[pre]);
+    paintSeek(el);
+  });
+  el.addEventListener('change', async () => {
+    const frac = el.value / 1000;
+    if (musicSrc === 'local' && music.duration) {
+      music.currentTime = frac * music.duration;
+    } else if (musicSrc === 'sp' && SP.player) {
+      const st = await SP.player.getCurrentState().catch(() => null);
+      if (st) { SP.player.seek(Math.round(frac * st.duration)); SP.lastPos = frac * st.duration; }
+    }
+    seekingPre = null;
+    el.blur(); // ca Space să continue să treacă la pasul următor
+  });
+}
+bindSeek('intro'); bindSeek('outro');
+setInterval(async () => {
+  const introActive = step === 'intro', outroActive = step === 'outro';
+  $('prog-intro-row').classList.toggle('show', introActive);
+  $('prog-outro-row').classList.toggle('show', outroActive);
+  $('eq-jingle').classList.toggle('playing', !jingle.paused);
+
+  if (musicSrc === 'local') {
+    $('eq-intro').classList.toggle('playing', introActive && !music.paused);
+    $('eq-outro').classList.toggle('playing', outroActive && !music.paused);
+    if ((introActive || outroActive) && music.duration)
+      setProgress(introActive ? 'intro' : 'outro', music.currentTime, music.duration);
+  } else if (musicSrc === 'sp' && SP.player) {
+    const st = await SP.player.getCurrentState().catch(() => null);
+    const playing = st && !st.paused;
+    $('eq-intro').classList.toggle('playing', introActive && playing);
+    $('eq-outro').classList.toggle('playing', outroActive && playing);
+    if (st && (introActive || outroActive))
+      setProgress(introActive ? 'intro' : 'outro', st.position / 1000, st.duration / 1000);
+    /* detectează sfârșitul piesei de încheiere pe Spotify */
+    if (outroActive && st && st.paused && st.position === 0 && SP.lastPos > 2000) finish();
+    if (st && !st.paused) SP.lastPos = st.position;
+  } else {
+    $('eq-intro').classList.remove('playing');
+    $('eq-outro').classList.remove('playing');
+  }
+}, 400);
+
+$('loop-intro').onchange = e => {
+  if (step !== 'intro') return;
+  if (musicSrc === 'local') music.loop = e.target.checked;
+  else if (musicSrc === 'sp') sApi(`/me/player/repeat?state=${e.target.checked ? 'track' : 'off'}&device_id=${SP.deviceId}`, { method: 'PUT' }).catch(() => {});
+};
+
+/* ── Volum master ── */
+const volEl = $('volume');
+volEl.value = masterVol * 100;
+$('volpct').textContent = Math.round(masterVol * 100) + '%';
+volEl.oninput = () => {
+  masterVol = volEl.value / 100;
+  $('volpct').textContent = volEl.value + '%';
+  localStorage.setItem('buletin.vol', volEl.value);
+  [music, jingle, previewer].forEach(a => { if (!a._fadeTimer && !a.paused) a.volume = masterVol; });
+  if (SP.player && !SP.fadeTimer && musicSrc === 'sp') SP.player.setVolume(masterVol);
+};
+
+/* ── Tastatură ── */
+document.addEventListener('keydown', e => {
+  if (e.target.matches('input, textarea')) return;
+  if (e.code === 'Space') { e.preventDefault(); if (!flowbtn.disabled) advance(); }
+  if (e.key === 'f' || e.key === 'F') fadeOutCurrent();
+  if (e.key === 'Escape') stopAll();
+});
+
+/* ── Căutare locală ── */
+searchEl.oninput = renderList;
+
+/* ── Init ── */
+(async function init() {
+  /* întoarcere din autorizarea Spotify */
+  const params = new URLSearchParams(location.search);
+  if (params.get('code') && localStorage.getItem('sp.verifier')) {
+    try {
+      await spTokenCall({
+        client_id: SP.clientId, grant_type: 'authorization_code',
+        code: params.get('code'), redirect_uri: SP_REDIRECT,
+        code_verifier: localStorage.getItem('sp.verifier')
+      });
+      toast('Spotify conectat ✓');
+    } catch { toast('Conectarea Spotify a eșuat — verifică Client ID și Redirect URI'); }
+    localStorage.removeItem('sp.verifier');
+    history.replaceState({}, '', SP_REDIRECT);
+  }
+  spRenderStatus();
+  if (SP.tokens) spLoadSDK();
+
+  try {
+    await openDB();
+    tracks = await dbAll();
+  } catch {
+    emptyEl.textContent = 'Browserul nu permite salvarea locală aici — deschide site-ul printr-un server local sau găzduiește-l (ex. GitHub Pages).';
+  }
+  renderList(); renderAssign(); updateFlowBtn(); markSteps();
+})();
+</script>
+</body>
+</html>
