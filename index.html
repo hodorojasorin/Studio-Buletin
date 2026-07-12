@@ -481,9 +481,6 @@
     <span id="volpct" style="min-width:38px">90%</span>
   </div>
   <div style="flex:1"></div>
-  <button class="tbtn" id="fadebtn" title="Fade out lent (F)">
-    <svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg>
-  </button>
   <button class="tbtn stop" id="stopbtn" title="Oprește tot (Esc)">
     <svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="6" width="12" height="12" rx="2" fill="currentColor" stroke="none"/></svg>
   </button>
@@ -1181,7 +1178,6 @@ async function fadeOutCurrent() {
 
 flowbtn.onclick = advance;
 $('stopbtn').onclick = stopAll;
-$('fadebtn').onclick = fadeOutCurrent;
 $('fsbtn').onclick = () => {
   if (document.fullscreenElement) document.exitFullscreen();
   else document.documentElement.requestFullscreen();
