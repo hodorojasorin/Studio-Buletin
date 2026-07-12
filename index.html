@@ -38,11 +38,7 @@
     background: rgba(255,255,255,.75); backdrop-filter: blur(6px);
     position: sticky; top: 0; z-index: 50;
   }
-  .head-left { display: flex; align-items: center; gap: 22px; justify-self: start; min-width: 0; }
-  .brand-logo { height: 52px; width: auto; }
-  .vol { display: flex; align-items: center; gap: 10px; font-size: 12px; color: var(--ink-dim); }
-  .vol input[type=range] { width: 130px; }
-  @media (max-width: 900px) { .head-left .vol { display: none; } }
+  .brand-logo { height: 52px; width: auto; justify-self: start; }
   .brand-title { font-size: 24px; font-weight: 900; letter-spacing: 1.5px; line-height: 1.1; text-align: center; }
   .brand-title span { color: var(--teal); }
   @media (max-width: 640px) { .brand-logo { height: 38px; } .brand-title { font-size: 17px; } }
@@ -60,8 +56,14 @@
     opacity: 0; pointer-events: none; transition: opacity .35s, background .35s;
   }
   #onair.live { opacity: 1; animation: pulse 1.4s ease-in-out infinite; }
-  #onair.playing { opacity: 1; background: var(--teal); letter-spacing: .5px; font-size: 15px; }
+  #onair.playing { opacity: 1; background: var(--teal); letter-spacing: .5px; font-size: 15px; pointer-events: auto; }
   #onair.playing .dot { display: none; }
+  .strip-seek {
+    display: none; align-items: center; gap: 8px; margin-left: 16px;
+    font: 600 12px 'Open Sans', sans-serif; letter-spacing: 0; font-variant-numeric: tabular-nums;
+  }
+  #onair.playing .strip-seek { display: flex; }
+  .strip-seek .seek { width: 220px; flex: none; }
   #onair .dot { width: 12px; height: 12px; border-radius: 50%; background: #fff; animation: blink 1.4s ease-in-out infinite; }
   @keyframes pulse { 50% { background: #b8102f; } }
   @keyframes blink { 50% { opacity: .25; } }
@@ -292,13 +294,12 @@
     display: flex; align-items: center; gap: 22px;
     padding: 14px 28px;
   }
+  .transport .vol { display: flex; align-items: center; gap: 10px; flex: 1; max-width: 340px; font-size: 12px; color: var(--ink-dim); }
   input[type=range] { -webkit-appearance: none; width: 100%; height: 6px; border-radius: 6px; background: var(--navy-line); outline: none; }
   input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
     background: var(--teal); cursor: pointer; border: 3px solid var(--navy-deep);
   }
-  #nowplaying { flex: 1; text-align: center; font-size: 13px; color: var(--ink-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  #nowplaying b { color: var(--ink); font-weight: 600; }
   .tbtn {
     width: 46px; height: 42px; border-radius: 10px; border: 1px solid var(--navy-line);
     background: var(--navy-card); color: var(--ink); cursor: pointer; transition: all .15s;
@@ -325,14 +326,7 @@
 <body>
 
 <header>
-  <div class="head-left">
-    <img class="brand-logo" src="epm-logo.png" alt="Echipa de Producție Multimedia">
-    <div class="vol">
-      <svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-      <input type="range" id="volume" min="0" max="100" value="90">
-      <span id="volpct" style="min-width:38px">90%</span>
-    </div>
-  </div>
+  <img class="brand-logo" src="epm-logo.png" alt="Echipa de Producție Multimedia">
   <h1 class="brand-title">STUDIO <span>BULETIN</span></h1>
   <div class="clockbox">
     <div id="clock">--:--:--</div>
@@ -340,7 +334,16 @@
   </div>
 </header>
 
-<div id="onair"><span class="dot"></span> <span id="onair-text">ON AIR — SPEAKERII VORBESC</span> <span class="dot"></span></div>
+<div id="onair">
+  <span class="dot"></span>
+  <span id="onair-text">ON AIR — SPEAKERII VORBESC</span>
+  <span class="strip-seek">
+    <span id="prog-strip-cur">0:00</span>
+    <input type="range" class="seek" id="seek-strip" min="0" max="1000" value="0" title="Derulează prin piesă">
+    <span id="prog-strip-dur">0:00</span>
+  </span>
+  <span class="dot"></span>
+</div>
 
 <main>
   <!-- ── SPOTIFY (stânga) ── -->
@@ -472,7 +475,12 @@
 </main>
 
 <div class="transport">
-  <div id="nowplaying">Nimic în redare</div>
+  <div class="vol">
+    <svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+    <input type="range" id="volume" min="0" max="100" value="90">
+    <span id="volpct" style="min-width:38px">90%</span>
+  </div>
+  <div style="flex:1"></div>
   <button class="tbtn" id="fadebtn" title="Fade out lent (F)">
     <svg class="ticon" viewBox="0 0 24 24" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M16 9l5 6"/><path d="M21 9l-5 6"/></svg>
   </button>
@@ -1175,15 +1183,16 @@ $('preview-jingle').onclick = () => {
 
 /* ── Progres & indicatori (local + Spotify + YouTube) ── */
 function updateNow(text) {
-  $('nowplaying').innerHTML = text ? `<b>${esc(text)}</b>` : 'Nimic în redare';
   nowPlayingText = text || '';
   updateStrip();
 }
-const lastDur = { intro: 0, outro: 0, onair: 0 };
+const lastDur = { intro: 0, outro: 0, onair: 0, strip: 0 };
 let seekingPre = null; // slotul pe care utilizatorul trage sliderul acum
 function paintSeek(el) {
   const p = el.value / 10;
-  el.style.background = `linear-gradient(90deg, var(--teal) ${p}%, var(--navy-deep) ${p}%)`;
+  el.style.background = el.id === 'seek-strip'
+    ? `linear-gradient(90deg, #fff ${p}%, rgba(255,255,255,.32) ${p}%)`
+    : `linear-gradient(90deg, var(--teal) ${p}%, var(--navy-deep) ${p}%)`;
 }
 function setProgress(pre, cur, dur) {
   lastDur[pre] = dur || 0;
@@ -1211,12 +1220,14 @@ function bindSeek(pre) {
       if (st) { SP.player.seek(Math.round(frac * st.duration)); SP.lastPos = frac * st.duration; }
     } else if (musicSrc === 'yt' && ytPlayer && lastDur[pre]) {
       ytPlayer.seekTo(frac * lastDur[pre], true);
+    } else if (!musicSrc && previewingFile && previewer.duration) {
+      previewer.currentTime = frac * previewer.duration;
     }
     seekingPre = null;
     el.blur(); // ca Space să continue să treacă la pasul următor
   });
 }
-bindSeek('intro'); bindSeek('outro'); bindSeek('onair');
+bindSeek('intro'); bindSeek('outro'); bindSeek('onair'); bindSeek('strip');
 
 setInterval(async () => {
   const introActive = step === 'intro', outroActive = step === 'outro';
@@ -1229,15 +1240,21 @@ setInterval(async () => {
   if (musicSrc === 'local') {
     $('eq-intro').classList.toggle('playing', introActive && !music.paused);
     $('eq-outro').classList.toggle('playing', outroActive && !music.paused);
-    if ((introActive || outroActive || onairRec) && music.duration)
-      setProgress(onairRec ? 'onair' : introActive ? 'intro' : 'outro', music.currentTime, music.duration);
+    if (music.duration) {
+      setProgress('strip', music.currentTime, music.duration);
+      if (introActive || outroActive || onairRec)
+        setProgress(onairRec ? 'onair' : introActive ? 'intro' : 'outro', music.currentTime, music.duration);
+    }
   } else if (musicSrc === 'sp' && SP.player) {
     const st = await SP.player.getCurrentState().catch(() => null);
     const playing = st && !st.paused;
     $('eq-intro').classList.toggle('playing', introActive && playing);
     $('eq-outro').classList.toggle('playing', outroActive && playing);
-    if (st && (introActive || outroActive))
-      setProgress(introActive ? 'intro' : 'outro', st.position / 1000, st.duration / 1000);
+    if (st) {
+      setProgress('strip', st.position / 1000, st.duration / 1000);
+      if (introActive || outroActive)
+        setProgress(introActive ? 'intro' : 'outro', st.position / 1000, st.duration / 1000);
+    }
     /* detectează sfârșitul piesei de încheiere pe Spotify */
     if (outroActive && st && st.paused && st.position === 0 && SP.lastPos > 2000) finish();
     if (st && !st.paused) SP.lastPos = st.position;
@@ -1245,11 +1262,14 @@ setInterval(async () => {
     const playing = ytPlayer.getPlayerState?.() === 1;
     $('eq-intro').classList.toggle('playing', introActive && playing);
     $('eq-outro').classList.toggle('playing', outroActive && playing);
+    setProgress('strip', ytPlayer.getCurrentTime?.() || 0, ytPlayer.getDuration?.() || 0);
     if (introActive || outroActive)
       setProgress(introActive ? 'intro' : 'outro', ytPlayer.getCurrentTime?.() || 0, ytPlayer.getDuration?.() || 0);
   } else {
     $('eq-intro').classList.remove('playing');
     $('eq-outro').classList.remove('playing');
+    if (previewingFile && previewer.duration)
+      setProgress('strip', previewer.currentTime, previewer.duration);
   }
 }, 400);
 
