@@ -778,10 +778,11 @@ function ytLoadAPI() {
       events: {
         onReady: () => { ytReady = true; },
         onStateChange: e => {
-          /* fade-in abia când redarea chiar a început, nu pe cronometru */
+          /* fade-in abia când redarea chiar a început, nu pe cronometru;
+             volumul playerului YouTube urcă la maxim — nivelul se dă din boxă/site */
           if (e.data === YT.PlayerState.PLAYING && ytPendingFade) {
             ytPendingFade = false;
-            ytFade(masterVol, 2200);
+            ytFade(1, 2200);
           }
           if (e.data !== YT.PlayerState.ENDED || musicSrc !== 'yt') return;
           if (ytLoop) { ytPlayer.seekTo(0, true); ytPlayer.playVideo(); }
