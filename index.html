@@ -64,13 +64,15 @@
   main {
     display: grid;
     grid-template-areas: "spotify flow youtube";
-    grid-template-columns: .92fr 1.16fr .92fr;
+    /* minmax(0, …) — lățimea coloanelor NU depinde de conținut:
+       un titlu lung de piesă nu mai poate împinge celelalte coloane */
+    grid-template-columns: minmax(0, .92fr) minmax(0, 1.16fr) minmax(0, .92fr);
     gap: 22px;
     max-width: 1560px; margin: 0 auto; padding: 22px 28px 120px;
   }
-  #col-spotify { grid-area: spotify; }
-  #col-flow { grid-area: flow; }
-  #col-youtube { grid-area: youtube; }
+  #col-spotify { grid-area: spotify; min-width: 0; }
+  #col-flow { grid-area: flow; min-width: 0; }
+  #col-youtube { grid-area: youtube; min-width: 0; }
   @media (max-width: 1120px) {
     main {
       grid-template-areas: "flow" "spotify" "youtube";
