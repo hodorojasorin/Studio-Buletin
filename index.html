@@ -175,6 +175,31 @@
   .tabs button:hover { color: var(--ink); }
   .tabs button.on { background: var(--teal); color: #fff; }
 
+  /* ── Prompter (buletinul zilei din Google Docs) ── */
+  .prompter {
+    background: var(--navy); border-radius: 14px; margin-bottom: 16px;
+    box-shadow: 0 8px 30px rgba(26,41,58,.25);
+    display: flex; flex-direction: column; overflow: hidden;
+  }
+  .prompter-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 10px;
+    padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.12);
+  }
+  .prompter-head b { color: #fff; font-size: 13px; letter-spacing: .5px; text-transform: uppercase; }
+  .prompter-ctl { display: flex; gap: 6px; }
+  .prompter-ctl button {
+    background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.2); color: #fff;
+    font: 700 12px 'IBM Plex Sans', sans-serif; padding: 6px 10px; border-radius: 7px;
+    cursor: pointer; transition: background .15s;
+  }
+  .prompter-ctl button:hover { background: rgba(255,255,255,.22); }
+  .prompter-body {
+    padding: 18px 20px; overflow-y: auto; max-height: 56vh;
+    color: #f5f8fb; font-size: 20px; line-height: 1.75; scroll-behavior: auto;
+  }
+  .prompter-body p { margin-bottom: 1em; }
+  .prompter-body p:first-child { color: #ffd9e0; font-weight: 600; } /* piesa de deschidere din doc */
+
   /* ── Programul buletinului (poza, fără chenar) ── */
   .prog-wrap { background: none; border: none; }
   #prog-link { display: block; }
@@ -509,8 +534,20 @@
     <div class="hint"><kbd>Space</kbd> pasul următor · <kbd>F</kbd> full screen · <kbd>Esc</kbd> stop tot</div>
   </section>
 
-  <!-- ── PROGRAMUL BULETINULUI (dreapta) ── -->
+  <!-- ── PROMPTER + PROGRAMUL BULETINULUI (dreapta) ── -->
   <section id="col-youtube">
+    <div class="prompter" id="prompter" hidden>
+      <div class="prompter-head">
+        <b id="prompter-title">Buletinul de azi</b>
+        <div class="prompter-ctl">
+          <button id="pr-smaller" title="Text mai mic">A−</button>
+          <button id="pr-bigger" title="Text mai mare">A+</button>
+          <button id="pr-scroll" title="Derulare automată">▶</button>
+        </div>
+      </div>
+      <div class="prompter-body" id="prompter-body"></div>
+    </div>
+
     <div class="prog-wrap">
       <a id="prog-link" target="_blank" hidden><img id="prog-img" alt="Programul buletinului"></a>
       <div class="empty" id="prog-empty">Nicio poză încă.</div>
@@ -1034,6 +1071,73 @@ function setTab(t) {
 }
 document.querySelectorAll('#src-tabs button').forEach(b => b.onclick = () => setTab(b.dataset.tab));
 
+/* ───────────────────────── Prompter — buletinul zilei din Google Docs ───────────────────────── */
+/* Documentul cu buletinele (public, „anyone with link") — ID-ul fix, se schimbă doar din cod */
+const PROMPTER_DOC = '';
+const RO_MONTHS = ['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
+
+function prompterParse(text) {
+  const n = new Date();
+  const isHeader = l =>
+    /^\s*\d{1,2}\s+(Ianuarie|Februarie|Martie|Aprilie|Mai|Iunie|Iulie|August|Septembrie|Octombrie|Noiembrie|Decembrie)\s*[-–—]\s*Buletin/i.test(l)
+    && !/\d\s*$/.test(l); // liniile din Cuprins se termină cu numărul paginii — le sărim
+  const todayRe = new RegExp('^\\s*0?' + n.getDate() + '\\s+' + RO_MONTHS[n.getMonth()] + '\\b', 'i');
+  const lines = text.split(/\r?\n/);
+  let start = -1;
+  for (let i = 0; i < lines.length; i++)
+    if (isHeader(lines[i]) && todayRe.test(lines[i])) start = i; // ultima apariție = conținutul, nu Cuprinsul
+  if (start < 0) return null;
+  let end = lines.length;
+  for (let i = start + 1; i < lines.length; i++)
+    if (isHeader(lines[i])) { end = i; break; }
+  const body = lines.slice(start + 1, end).join('\n').replace(/\n{3,}/g, '\n\n').trim();
+  return body ? { title: lines[start].trim(), body } : null;
+}
+
+async function prompterLoad() {
+  if (!PROMPTER_DOC || !PROG.key) { $('prompter').hidden = true; return; }
+  try {
+    const r = await fetch(`https://www.googleapis.com/drive/v3/files/${PROMPTER_DOC}/export?mimeType=text/plain&key=${PROG.key}`);
+    if (!r.ok) throw new Error();
+    const found = prompterParse(await r.text());
+    if (!found) { $('prompter').hidden = true; return; }
+    $('prompter-title').textContent = found.title;
+    $('prompter-body').innerHTML = found.body
+      .split(/\n\s*\n|\n/)
+      .filter(p => p.trim())
+      .map(p => `<p>${esc(p.trim())}</p>`)
+      .join('');
+    $('prompter').hidden = false;
+  } catch { $('prompter').hidden = true; }
+}
+
+/* controale prompter: mărime text + derulare automată */
+let prFont = +(localStorage.getItem('prompter.font') || 20);
+let prScrollTimer = null;
+function prApplyFont() {
+  $('prompter-body').style.fontSize = prFont + 'px';
+  localStorage.setItem('prompter.font', prFont);
+}
+$('pr-bigger').onclick = () => { prFont = Math.min(34, prFont + 2); prApplyFont(); };
+$('pr-smaller').onclick = () => { prFont = Math.max(14, prFont - 2); prApplyFont(); };
+$('pr-scroll').onclick = () => {
+  if (prScrollTimer) {
+    clearInterval(prScrollTimer); prScrollTimer = null;
+    $('pr-scroll').textContent = '▶';
+  } else {
+    prScrollTimer = setInterval(() => {
+      const b = $('prompter-body');
+      b.scrollTop += 1;
+      if (b.scrollTop + b.clientHeight >= b.scrollHeight) {
+        clearInterval(prScrollTimer); prScrollTimer = null;
+        $('pr-scroll').textContent = '▶';
+      }
+    }, 60);
+    $('pr-scroll').textContent = '⏸';
+  }
+};
+prApplyFont();
+
 /* ───────────────────────── Programul buletinului (poza din Drive / repo) ───────────────────────── */
 /* Folderul public de Google Drive al echipei + cheia API (fixe, nu se configurează din site) */
 const PROG = {
@@ -1469,7 +1573,8 @@ document.addEventListener('keydown', e => {
   if (libUnlocked()) libLoad();
   setTab(localStorage.getItem('buletin.tab') || 'sp');
   progLoad();
-  setInterval(progLoad, 10 * 60 * 1000); // poza se reîmprospătează singură la 10 minute
+  prompterLoad();
+  setInterval(() => { progLoad(); prompterLoad(); }, 10 * 60 * 1000); // poza și buletinul se reîmprospătează singure
 })();
 </script>
 </body>
