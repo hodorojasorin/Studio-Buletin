@@ -1073,7 +1073,7 @@ document.querySelectorAll('#src-tabs button').forEach(b => b.onclick = () => set
 
 /* ───────────────────────── Prompter — buletinul zilei din Google Docs ───────────────────────── */
 /* Documentul cu buletinele (public, „anyone with link") — ID-ul fix, se schimbă doar din cod */
-const PROMPTER_DOC = '';
+const PROMPTER_DOC = '1GpwXxFs70AonXFSvwvaD-eHWOBd35E-4-8wB9NHVUTg';
 const RO_MONTHS = ['Ianuarie','Februarie','Martie','Aprilie','Mai','Iunie','Iulie','August','Septembrie','Octombrie','Noiembrie','Decembrie'];
 
 function prompterParse(text) {
@@ -1142,7 +1142,7 @@ prApplyFont();
 /* Folderul public de Google Drive al echipei + cheia API (fixe, nu se configurează din site) */
 const PROG = {
   folder: '15BeAo8wygvG-4RbHoBojLxONP9o-VBcQ',
-  key: localStorage.getItem('prog.key') || ''  // cheia API Google Drive — se lipește aici când există
+  key: 'AIzaSyAX3GwLS0NHaaUCDD5SVJG4yt5xT4Ax4Vw'  // cheia API Google (doar citire pe date publice)
 };
 function progShow(src, href) {
   $('prog-img').src = src;
