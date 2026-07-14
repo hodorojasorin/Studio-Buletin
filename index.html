@@ -174,6 +174,19 @@
   }
   .tabs button:hover { color: var(--ink); }
   .tabs button.on { background: var(--teal); color: #fff; }
+  .jingle-ctl { display: flex; align-items: center; gap: 8px; }
+  .mini-tabs {
+    display: flex; gap: 3px; padding: 3px;
+    background: var(--navy-deep); border: 1px solid var(--navy-line); border-radius: 9px;
+  }
+  .mini-tabs button {
+    padding: 6px 10px; border: none; border-radius: 6px; cursor: pointer;
+    background: transparent; color: var(--ink-dim);
+    font: 700 10.5px 'IBM Plex Sans', sans-serif; letter-spacing: .5px; text-transform: uppercase;
+    transition: all .15s;
+  }
+  .mini-tabs button:hover { color: var(--ink); }
+  .mini-tabs button.on { background: var(--teal); color: #fff; }
 
   /* ── Prompter (buletinul zilei din Google Docs) ── */
   .prompter {
@@ -505,7 +518,13 @@
         <h3>Jingle Buletin <span class="eq" id="eq-jingle"><i></i><i></i><i></i><i></i></span></h3>
         <div class="desc">Atenționează elevii că în câteva secunde întră speakerii!</div>
       </div>
-      <button class="iconbtn" id="preview-jingle" title="Ascultă jingle-ul (test)">▶</button>
+      <div class="jingle-ctl">
+        <div class="mini-tabs" id="jingle-pick">
+          <button data-j="1" class="on">Jingle 1</button>
+          <button data-j="2">Jingle 2</button>
+        </div>
+        <button class="iconbtn" id="preview-jingle" title="Ascultă jingle-ul (test)">▶</button>
+      </div>
     </div>
 
     <div class="step" id="step3" data-step="onair">
@@ -1418,6 +1437,25 @@ $('preview-jingle').onclick = () => {
   if (jingle.paused) { jingle.currentTime = 0; jingle.volume = masterVol; jingle.play(); }
   else { jingle.pause(); jingle.currentTime = 0; }
 };
+
+/* ── Alegerea jingle-ului (1 sau 2) ── */
+const JINGLES = { '1': 'jingle-buletin.mp3', '2': 'jingle2.mp3' };
+let jingleSel = localStorage.getItem('buletin.jingle') || '1';
+function applyJingle() {
+  const playing = !jingle.paused;
+  if (playing) { jingle.pause(); jingle.currentTime = 0; }
+  jingle.src = JINGLES[jingleSel];
+  document.querySelectorAll('#jingle-pick button')
+    .forEach(b => b.classList.toggle('on', b.dataset.j === jingleSel));
+}
+document.querySelectorAll('#jingle-pick button').forEach(b => b.onclick = () => {
+  if (jingleSel === b.dataset.j) return;
+  jingleSel = b.dataset.j;
+  localStorage.setItem('buletin.jingle', jingleSel);
+  applyJingle();
+  toast('Jingle ' + jingleSel + ' selectat ✓');
+});
+applyJingle();
 
 /* ── Progres & indicatori (local + Spotify + YouTube) ── */
 function updateNow(text) {
