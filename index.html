@@ -1149,23 +1149,36 @@ function prApplyFont() {
 }
 $('pr-bigger').onclick = () => { prFont = Math.min(34, prFont + 2); prApplyFont(); };
 $('pr-smaller').onclick = () => { prFont = Math.max(14, prFont - 2); prApplyFont(); };
-$('pr-scroll').onclick = () => {
-  if (prScrollTimer) {
-    clearInterval(prScrollTimer); prScrollTimer = null;
-    $('pr-scroll').textContent = '▶';
-  } else {
-    prScrollTimer = setInterval(() => {
-      const b = $('prompter-body');
-      b.scrollTop += 1;
-      if (b.scrollTop + b.clientHeight >= b.scrollHeight) {
-        clearInterval(prScrollTimer); prScrollTimer = null;
-        $('pr-scroll').textContent = '▶';
-      }
-    }, 60);
-    $('pr-scroll').textContent = '⏸';
-  }
-};
+function prStartScroll() {
+  if (prScrollTimer || $('prompter').hidden) return;
+  prScrollTimer = setInterval(() => {
+    const b = $('prompter-body');
+    b.scrollTop += 1;
+    if (b.scrollTop + b.clientHeight >= b.scrollHeight) prStopScroll();
+  }, 60);
+  $('pr-scroll').textContent = '⏸';
+}
+function prStopScroll() {
+  clearInterval(prScrollTimer); prScrollTimer = null;
+  $('pr-scroll').textContent = '▶';
+}
+$('pr-scroll').onclick = () => prScrollTimer ? prStopScroll() : prStartScroll();
 prApplyFont();
+
+/* la ON AIR, prompterul pornește singur derularea după 4 secunde */
+let prAutoTimer = null;
+function prOnAirSync() {
+  if (step === 'onair') {
+    if (!prAutoTimer && !prScrollTimer)
+      prAutoTimer = setTimeout(() => {
+        prAutoTimer = null;
+        if (step === 'onair') prStartScroll();
+      }, 4000);
+  } else {
+    clearTimeout(prAutoTimer); prAutoTimer = null;
+    prStopScroll();
+  }
+}
 
 /* ───────────────────────── Programul buletinului (poza din Drive / repo) ───────────────────────── */
 /* Folderul public de Google Drive al echipei + cheia API (fixe, nu se configurează din site) */
@@ -1277,6 +1290,7 @@ function markSteps() {
   });
   if (step === 'idle') order.forEach(s => stepEls[s].classList.remove('active', 'done'));
   updateStrip();
+  prOnAirSync();
 }
 
 /* banda de sus: piesa în redare (teal) sau ON AIR (roșu) */
