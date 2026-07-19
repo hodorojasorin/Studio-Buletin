@@ -1177,7 +1177,7 @@ function prStopScroll() { prSetVel(0); }
 $('pr-scroll').onclick = () => prScrollTimer ? prStopScroll() : prStartScroll();
 prApplyFont();
 
-/* la ON AIR, prompterul pornește singur derularea după 7 secunde */
+/* la ON AIR, prompterul pornește singur derularea după 9 secunde */
 let prAutoTimer = null;
 function prOnAirSync() {
   if (step === 'onair') {
@@ -1185,7 +1185,7 @@ function prOnAirSync() {
       prAutoTimer = setTimeout(() => {
         prAutoTimer = null;
         if (step === 'onair') prStartScroll();
-      }, 7000);
+      }, 9000);
   } else {
     clearTimeout(prAutoTimer); prAutoTimer = null;
     prStopScroll();
